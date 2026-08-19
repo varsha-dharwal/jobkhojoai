@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const COLORS = ["#0057D9", "#00C48C", "#FF7A00", "#7C4DFF", "#FF3B77", "#00B8D9", "#FFAB00", "#36B37E"];
 
 function hashString(str){
@@ -11,7 +13,21 @@ function getInitials(name){
   return words.map(w => w[0]?.toUpperCase() || "").join("") || "?";
 }
 
-export default function CompanyAvatar({ name, size = 44 }){
+export default function CompanyAvatar({ name, logoUrl, size = 44 }){
+  const [failed, setFailed] = useState(false);
+
+  if (logoUrl && !failed) {
+    return (
+      <img
+        src={logoUrl}
+        alt={`${name} logo`}
+        className="company-avatar"
+        style={{ width:size, height:size, objectFit:"contain", background:"#fff" }}
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
   const color = COLORS[hashString(name || "") % COLORS.length];
   return (
     <div

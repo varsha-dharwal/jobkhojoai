@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../api/client";
 
 const empty = {
-  title:"", organization:"", category:"Full-time", remote:false, location:"Across India",
-  salaryMin:"", salaryMax:"", vacancies:"",
+  title:"", organization:"", logoUrl:"", category:"Full-time", remote:false, location:"Across India",
+  salaryMin:"", salaryMax:"", vacancies:"", experience:"", education:"", skills:"",
   startDate:"", lastDate:"", applyLink:"",
   roleDescription:"", responsibilities:"", requirements:"", aboutCompany:"",
 };
@@ -114,6 +114,8 @@ export default function AdminJobForm(){
         <FormSection title="Basic Info">
           <Field label="Job Title" name="title" value={form.title} onChange={update} required />
           <Field label="Organization" name="organization" value={form.organization} onChange={update} required />
+          <Field label="Company Logo URL" name="logoUrl" value={form.logoUrl} onChange={update} />
+          <p style={{margin:"-10px 0 16px", fontSize:12, color:"var(--color-text-tertiary)"}}>Optional — a full image URL, or a path like /logos/company.png. Leave blank to use an auto-generated initials badge.</p>
 
           <div className="form-grid-2">
             <div style={{marginBottom:16}}>
@@ -138,6 +140,18 @@ export default function AdminJobForm(){
           </div>
 
           <Field label="Location" name="location" value={form.location} onChange={update} />
+
+          <div className="form-grid-2">
+            <Field label="Experience" name="experience" value={form.experience} onChange={update} />
+            <Field label="Education" name="education" value={form.education} onChange={update} />
+          </div>
+          <Field
+            label="Key Skills"
+            name="skills"
+            value={form.skills}
+            onChange={update}
+          />
+          <p style={{margin:"-10px 0 16px", fontSize:12, color:"var(--color-text-tertiary)"}}>Comma-separated — shown as tags, e.g. Figma, Adobe XD, Sketch</p>
         </FormSection>
 
         <FormSection title="Compensation & Timeline">
@@ -147,8 +161,8 @@ export default function AdminJobForm(){
           </div>
           <Field label="Vacancies" name="vacancies" value={form.vacancies} onChange={update} />
           <div className="form-grid-2">
-            <Field label="Start Date" name="startDate" type="date" value={form.startDate} onChange={update} required />
-            <Field label="Last Date" name="lastDate" type="date" value={form.lastDate} onChange={update} required />
+            <Field label="Start Date" name="startDate" type="date" value={form.startDate} onChange={update} />
+            <Field label="Last Date" name="lastDate" type="date" value={form.lastDate} onChange={update} />
           </div>
         </FormSection>
 

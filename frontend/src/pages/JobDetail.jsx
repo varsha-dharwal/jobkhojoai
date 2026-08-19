@@ -82,6 +82,9 @@ export default function JobDetail(){
       hiringOrganization: { "@type": "Organization", name: job.organization },
       jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: "IN", addressRegion: job.location } },
       baseSalary: { "@type": "MonetaryAmount", currency: "INR", value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: "MONTH" } },
+      ...(job.experience ? { experienceRequirements: job.experience } : {}),
+      ...(job.education ? { educationRequirements: job.education } : {}),
+      ...(job.skills ? { skills: job.skills } : {}),
     });
     document.head.appendChild(script);
     return () => document.head.removeChild(script);
@@ -100,7 +103,7 @@ export default function JobDetail(){
   return (
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720}}>
       <div className="card" style={{padding:24, marginBottom:24, display:"flex", gap:16}}>
-        <CompanyAvatar name={job.organization} size={56} />
+        <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={56} />
         <div style={{flex:1, minWidth:0}}>
           <div style={{display:"flex", gap:8, flexWrap:"wrap", marginBottom:8}}>
             <span className={`badge ${job.category === "Internship" ? "badge-internship" : "badge-fulltime"}`}>{job.category}</span>
@@ -118,11 +121,24 @@ export default function JobDetail(){
       </div>
 
       <div className="card" style={{padding:24, marginBottom:28}}>
+        <Row label="Experience" value={job.experience} />
         <Row label="Salary" value={job.salaryMin && job.salaryMax ? `${job.salaryMin} – ${job.salaryMax}` : (job.salaryMin || job.salaryMax)} />
         <Row label="Vacancies" value={job.vacancies} />
-        <Row label="Start Date" value={formatDate(job.startDate)} />
-        <Row label="Last Date" value={formatDate(job.lastDate)} />
+        <Row label="Education" value={job.education} />
+        <Row label="Start Date" value={job.startDate ? formatDate(job.startDate) : null} />
+        <Row label="Last Date" value={job.lastDate ? formatDate(job.lastDate) : null} />
       </div>
+
+      {job.skills && (
+        <section style={{marginBottom:32}}>
+          <h2 style={{fontSize:14, textTransform:"uppercase", letterSpacing:.5, color:"var(--color-text-tertiary)", marginBottom:16}}>Key Skills</h2>
+          <div className="tag-pill-group">
+            {job.skills.split(",").map(s => s.trim()).filter(Boolean).map(s => (
+              <span key={s} className="tag-pill">{s}</span>
+            ))}
+          </div>
+        </section>
+      )}
 
       {job.roleDescription && (
         <section style={{marginBottom:32}}>

@@ -18,12 +18,13 @@ export default function JobCard({ job, index = 0 }){
       whileHover={{ y: -4, transition: { duration: 0.15 } }}
       whileTap={{ scale: 0.98 }}
     >
-      <CompanyAvatar name={job.organization} />
+      <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} />
       <div style={{flex:1, minWidth:0}}>
         <h3 style={{margin:"0 0 2px", fontSize:17, fontWeight:700}}>{job.title}</h3>
         <p style={{margin:"0 0 8px", color:"var(--color-text-secondary)", fontSize:14, fontWeight:600}}>{job.organization}</p>
         <p style={{margin:"0 0 12px", color:"var(--color-text-tertiary)", fontSize:13}}>
-          {job.category} · {job.location} ({job.remote ? "Remote" : "On-site"}) · {timeAgo(job.createdAt)}
+          {job.category} · {job.location} ({job.remote ? "Remote" : "On-site"})
+          {job.experience && <> · {job.experience}</>} · {timeAgo(job.createdAt)}
         </p>
         {job.status === "active" && (
           <span className="status-pill"><span className="dot" aria-hidden="true" /> Actively Recruiting</span>
