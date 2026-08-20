@@ -30,12 +30,6 @@ export default function Navbar(){
             ))}
           </nav>
 
-          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} style={{display:"inline-flex"}}>
-            <Link to="/admin/jobs" className="btn btn-primary btn-admin" onClick={() => setOpen(false)}>
-              Admin
-            </Link>
-          </motion.div>
-
           <button
             type="button"
             className="nav-toggle"
