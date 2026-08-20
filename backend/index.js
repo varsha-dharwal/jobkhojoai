@@ -9,7 +9,20 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "*" }));
+const allowedOrigins = (process.env.CLIENT_URL || "*")
+  .split(",")
+  .map((origin) => origin.trim());
+
+app.use(
+  cors({
+    origin: allowedOrigins.includes("*")
+      ? "*"
+      : (origin, callback) => {
+          if (!origin || allowedOrigins.includes(origin)) callback(null, true);
+          else callback(new Error("Not allowed by CORS"));
+        },
+  })
+);
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ status: "jobkhojoAI API running" }));
