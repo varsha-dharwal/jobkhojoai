@@ -122,6 +122,7 @@ export default function AdminJobForm(){
               <label>Category</label>
               <select value={form.category} onChange={e=>update("category", e.target.value)}>
                 <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
                 <option value="Internship">Internship</option>
               </select>
             </div>

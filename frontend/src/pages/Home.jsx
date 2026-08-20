@@ -55,7 +55,7 @@ export default function Home(){
   // into a filtered view even when already on this page (no component remount).
   useEffect(() => {
     const c = searchParams.get("category");
-    setCategory(c === "Full-time" || c === "Internship" ? c : "All");
+    setCategory(c === "Full-time" || c === "Part-time" || c === "Internship" ? c : "All");
     setRemoteOnly(searchParams.get("remote") === "true");
   }, [searchParams]);
 
@@ -222,7 +222,7 @@ export default function Home(){
             onChange={e => setSearch(e.target.value)}
           />
           <div role="group" aria-label="Filter jobs by category" className="filter-pills">
-            {["All","Full-time","Internship"].map(c => (
+            {["All","Full-time","Part-time","Internship"].map(c => (
               <motion.button
                 key={c}
                 type="button"

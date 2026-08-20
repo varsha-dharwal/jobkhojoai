@@ -77,7 +77,7 @@ export default function JobDetail(){
       description: job.roleDescription || job.title,
       datePosted: job.createdAt,
       validThrough: job.lastDate,
-      employmentType: job.category === "Internship" ? "INTERN" : "FULL_TIME",
+      employmentType: job.category === "Internship" ? "INTERN" : job.category === "Part-time" ? "PART_TIME" : "FULL_TIME",
       ...(job.remote ? { jobLocationType: "TELECOMMUTE" } : {}),
       hiringOrganization: { "@type": "Organization", name: job.organization },
       jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: "IN", addressRegion: job.location } },
@@ -106,7 +106,7 @@ export default function JobDetail(){
         <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={56} />
         <div style={{flex:1, minWidth:0}}>
           <div style={{display:"flex", gap:8, flexWrap:"wrap", marginBottom:8}}>
-            <span className={`badge ${job.category === "Internship" ? "badge-internship" : "badge-fulltime"}`}>{job.category}</span>
+            <span className={`badge ${job.category === "Internship" ? "badge-internship" : job.category === "Part-time" ? "badge-parttime" : "badge-fulltime"}`}>{job.category}</span>
             {job.remote && <span className="badge badge-remote">Remote</span>}
           </div>
           <h1 style={{fontSize:"clamp(20px, 4vw, 28px)", lineHeight:1.2, margin:"0 0 4px"}}>{job.title}</h1>
