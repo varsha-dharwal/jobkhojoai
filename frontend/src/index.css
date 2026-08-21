@@ -69,6 +69,7 @@ html{ scroll-behavior: smooth; scrollbar-gutter: stable; }
 }
 body{
   margin:0;
+  overflow-x: hidden;
   font-family: var(--font-primary);
   background:
     radial-gradient(720px 420px at 12% -8%, rgba(0,196,140,.10), transparent 60%),
@@ -194,11 +195,38 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
 .nav-mobile a{ padding: var(--space-5) var(--space-3); font-size: var(--font-size-lg); color: var(--color-text-secondary); }
 .nav-mobile a[aria-current="page"]{ color: var(--color-text-primary); }
 
+/* ===== Header search ===== */
+.header-search-desktop{
+  display:flex; align-items:center; gap: var(--space-4);
+  width: 100%; max-width: 240px;
+  padding: 8px 14px; border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-default); background: var(--color-surface-raised);
+  color: var(--color-text-tertiary);
+  transition: border-color var(--motion-fast);
+}
+.header-search-desktop:focus-within{ border-color: var(--color-brand); color: var(--color-text-secondary); }
+.header-search-desktop input{
+  width:100%; background:transparent; border:none; padding:0; font-size: var(--font-size-sm);
+}
+.header-search-desktop input:focus{ border-color:transparent; }
+.header-search-mobile{
+  display:flex; align-items:center; gap: var(--space-4);
+  padding: 8px 14px; margin-bottom: var(--space-5); border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-default); background: var(--color-surface-raised);
+  color: var(--color-text-tertiary);
+}
+.header-search-mobile input{ width:100%; background:transparent; border:none; padding:0; font-size: var(--font-size-md); }
+.header-search-mobile input:focus{ border-color:transparent; }
+
 @media (max-width: 980px){
   .logo-link img{ width: 60px; }
+  .header-search-desktop{ display:none; }
   .nav-desktop{ display:none; }
   .nav-toggle{ display:inline-flex; }
   .nav-mobile.open{ display:flex; }
+}
+@media (min-width: 981px){
+  .header-search-mobile{ display:none; }
 }
 
 /* ===== Hero ===== */
@@ -270,6 +298,56 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
   display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-6);
 }
 .jobs-grid .card{ margin-bottom:0; height:100%; }
+
+/* ===== Skeleton loading cards ===== */
+.skeleton-card{ display:flex; gap:14px; padding:20px; }
+.skeleton-avatar{ width:44px; height:44px; border-radius: var(--radius-xs); flex-shrink:0; background: var(--color-surface-raised); position:relative; overflow:hidden; }
+.skeleton-lines{ flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+.skeleton-line{ height:12px; border-radius:4px; background: var(--color-surface-raised); position:relative; overflow:hidden; }
+.skeleton-avatar::after, .skeleton-line::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.4s infinite;
+}
+@keyframes skeleton-shimmer{ 100%{ transform: translateX(100%); } }
+
+/* ===== Active filter chip (e.g. company filter from Featured Companies) ===== */
+.active-filter-chip{
+  display:inline-flex; align-items:center; gap: var(--space-4);
+  padding: 8px 8px 8px 16px; margin-bottom: var(--space-6); border-radius: var(--radius-pill);
+  background: var(--color-brand-soft); color: var(--color-text-primary); font-size: var(--font-size-sm);
+}
+.active-filter-chip strong{ color: var(--color-brand-strong); }
+.active-filter-chip button{
+  width:22px; height:22px; border-radius:50%; border:none; background: rgba(255,255,255,.08);
+  color: var(--color-text-primary); cursor:pointer; line-height:1; font-size:15px;
+  display:flex; align-items:center; justify-content:center;
+}
+.active-filter-chip button:hover{ background: rgba(255,255,255,.16); }
+
+/* ===== Company grid (Featured Companies) ===== */
+.company-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-5); }
+.company-tile{
+  display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px;
+  padding: var(--space-7) var(--space-5); cursor:pointer; color:inherit;
+}
+.company-tile .company-avatar{ width:56px; height:56px; font-size:19px; border-radius: var(--radius-sm); }
+.company-tile .cname{ font-size:13.5px; font-weight:700; line-height:1.3; }
+.company-tile .ccount{ font-size:11.5px; color: var(--color-text-tertiary); }
+
+/* ===== Job shelf (Remote Jobs, Latest Internships) ===== */
+.shelf-heading{
+  display:flex; align-items:flex-end; justify-content:space-between; gap: var(--space-6);
+  margin: 0 0 var(--space-8);
+}
+.shelf-heading h2{ margin:0 0 6px; font-size: var(--font-size-xl); }
+.shelf-heading p{ margin:0; color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.shelf-view-all{ flex-shrink:0; color: var(--color-brand-strong); font-weight:600; font-size: var(--font-size-sm); white-space:nowrap; }
+.shelf-view-all:hover{ text-decoration: underline; }
+@media (max-width: 480px){
+  .shelf-heading{ flex-direction:column; align-items:flex-start; gap: var(--space-3); }
+}
 
 /* ===== Empty / status states ===== */
 .empty-state{

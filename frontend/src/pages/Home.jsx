@@ -5,6 +5,9 @@ import api from "../api/client";
 import JobCard from "../components/JobCard";
 import VideoBackground from "../components/VideoBackground";
 import FAQSection from "../components/FAQSection";
+import FeaturedCompanies from "../components/FeaturedCompanies";
+import JobShelf from "../components/JobShelf";
+import SkeletonCards from "../components/SkeletonCards";
 
 const FEATURES = [
   {
@@ -48,15 +51,18 @@ export default function Home(){
   const [category, setCategory] = useState("All");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [search, setSearch] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Sync filters from the URL — lets internal links (e.g. from the FAQ) deep-link
-  // into a filtered view even when already on this page (no component remount).
+  // Sync filters from the URL — lets internal links (e.g. the header search, the FAQ,
+  // or a Featured Companies tile) deep-link into a filtered view even when already on this page.
   useEffect(() => {
     const c = searchParams.get("category");
     setCategory(c === "Full-time" || c === "Part-time" || c === "Internship" ? c : "All");
     setRemoteOnly(searchParams.get("remote") === "true");
+    setSearch(searchParams.get("search") || "");
+    setCompanyFilter(searchParams.get("company") || "");
   }, [searchParams]);
 
   useEffect(() => {
@@ -72,12 +78,13 @@ export default function Home(){
     if (category !== "All") params.category = category;
     if (remoteOnly) params.remote = "true";
     if (search) params.search = search;
+    if (companyFilter) params.company = companyFilter;
 
     api.get("/jobs", { params })
       .then(res => setJobs(res.data))
       .catch(() => setError("Couldn't load jobs. Please try again in a moment."))
       .finally(() => setLoading(false));
-  }, [category, remoteOnly, search]);
+  }, [category, remoteOnly, search, companyFilter]);
 
   return (
     <main className="container">
@@ -203,7 +210,7 @@ export default function Home(){
           viewport={{ once: true, margin: "-40px" }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         >
-          <h2 style={{margin:0}}>Latest Job Openings</h2>
+          <h2 style={{margin:0}}>Latest Tech Jobs</h2>
         </motion.div>
 
         <motion.section
@@ -248,7 +255,14 @@ export default function Home(){
           </div>
         </motion.section>
 
-        {loading && <p style={{color:"var(--color-text-tertiary)"}} role="status">Loading jobs…</p>}
+        {companyFilter && (
+          <div className="active-filter-chip">
+            Showing jobs at <strong>{companyFilter}</strong>
+            <button type="button" onClick={() => setCompanyFilter("")} aria-label={`Clear ${companyFilter} filter`}>×</button>
+          </div>
+        )}
+
+        {loading && <SkeletonCards count={6} />}
         {error && <p style={{color:"var(--color-danger)"}} role="alert">{error}</p>}
         {!loading && !error && jobs.length === 0 && (
           <motion.div className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -271,6 +285,22 @@ export default function Home(){
           )}
         </AnimatePresence>
       </div>
+
+      <FeaturedCompanies />
+
+      <JobShelf
+        title="Remote Jobs"
+        subtitle="Fully remote tech roles you can do from anywhere."
+        params={{ remote: "true" }}
+        viewAllHref="/?remote=true#jobs"
+      />
+
+      <JobShelf
+        title="Latest Internships"
+        subtitle="Kickstart your tech career with these internship openings."
+        params={{ category: "Internship" }}
+        viewAllHref="/?category=Internship#jobs"
+      />
 
       <FAQSection />
     </main>

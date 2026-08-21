@@ -14,19 +14,40 @@ function makeSlug(title, organization) {
 
 // ---------- PUBLIC ----------
 
-// GET /api/jobs?category=Full-time&remote=true&search=react
+// GET /api/jobs?category=Full-time&remote=true&search=react&company=Amazon&limit=4
+// "search" matches across title, organization, and skills (one box, three targets).
 router.get("/", async (req, res) => {
   try {
-    const { category, remote, search } = req.query;
+    const { category, remote, search, company, limit } = req.query;
     const filter = { status: "active" };
     if (category && category !== "All") filter.category = category;
     if (remote === "true") filter.remote = true;
+    if (company) filter.organization = company;
     if (search) filter.$text = { $search: search };
 
-    const jobs = await Job.find(filter).sort({ createdAt: -1 });
+    let query = Job.find(filter).sort({ createdAt: -1 });
+    if (limit) query = query.limit(Number(limit));
+    const jobs = await query;
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: "Could not load jobs", error: err.message });
+  }
+});
+
+// GET /api/jobs/meta/companies -> distinct organizations from active jobs, most active first
+router.get("/meta/companies", async (req, res) => {
+  try {
+    const companies = await Job.aggregate([
+      { $match: { status: "active" } },
+      { $sort: { createdAt: -1 } },
+      { $group: { _id: "$organization", jobCount: { $sum: 1 }, logoUrl: { $first: "$logoUrl" } } },
+      { $sort: { jobCount: -1 } },
+      { $limit: 12 },
+      { $project: { _id: 0, organization: "$_id", jobCount: 1, logoUrl: 1 } },
+    ]);
+    res.json(companies);
+  } catch (err) {
+    res.status(500).json({ message: "Could not load companies", error: err.message });
   }
 });
 

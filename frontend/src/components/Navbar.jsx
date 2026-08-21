@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/logo.png";
 
@@ -11,8 +11,26 @@ const links = [
   { to: "/terms", label: "Terms" },
 ];
 
+function SearchIcon(){
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M14 14l-3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
 export default function Navbar(){
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  function submitSearch(e){
+    e.preventDefault();
+    const q = query.trim();
+    navigate(q ? `/?search=${encodeURIComponent(q)}#jobs` : "/#jobs");
+    setOpen(false);
+  }
 
   return (
     <header className="site-header">
@@ -24,6 +42,17 @@ export default function Navbar(){
         </motion.div>
 
         <div className="site-header-right">
+          <form className="header-search-desktop" role="search" onSubmit={submitSearch}>
+            <SearchIcon />
+            <input
+              type="search"
+              aria-label="Search jobs, skills, or companies"
+              placeholder="Search jobs, skills, companies…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          </form>
+
           <nav className="nav-desktop" aria-label="Primary">
             {links.map(l => (
               <NavLink key={l.to} to={l.to} end={l.end}>{l.label}</NavLink>
@@ -61,6 +90,16 @@ export default function Navbar(){
             style={{overflow:"hidden"}}
           >
             <nav className="nav-mobile open" aria-label="Mobile">
+              <form className="header-search-mobile" role="search" onSubmit={submitSearch}>
+                <SearchIcon />
+                <input
+                  type="search"
+                  aria-label="Search jobs, skills, or companies"
+                  placeholder="Search jobs, skills, companies…"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                />
+              </form>
               {links.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setOpen(false)}>{l.label}</NavLink>
               ))}
