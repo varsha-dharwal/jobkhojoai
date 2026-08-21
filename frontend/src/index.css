@@ -177,7 +177,7 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
   min-height: 64px; padding: var(--space-4) 0;
 }
 .site-header-right{ display:flex; align-items:center; gap: var(--space-7); }
-.logo-link img{ width: 200px; height: auto; display:block; }
+.logo-link img{ width: 100px; height: auto; display:block; }
 .nav-desktop{ display:flex; gap: var(--space-7); font-size: var(--font-size-md); color: var(--color-text-secondary); white-space:nowrap; }
 .btn-admin{ padding: var(--space-3) var(--space-6); font-size: var(--font-size-sm); white-space:nowrap; }
 .nav-desktop a{ position:relative; padding: 4px 0; }
@@ -195,7 +195,7 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
 .nav-mobile a[aria-current="page"]{ color: var(--color-text-primary); }
 
 @media (max-width: 980px){
-  .logo-link img{ width: 108px; }
+  .logo-link img{ width: 60px; }
   .nav-desktop{ display:none; }
   .nav-toggle{ display:inline-flex; }
   .nav-mobile.open{ display:flex; }
