@@ -8,6 +8,28 @@ import FAQSection from "../components/FAQSection";
 import FeaturedCompanies from "../components/FeaturedCompanies";
 import JobShelf from "../components/JobShelf";
 import SkeletonCards from "../components/SkeletonCards";
+import SEO, { SITE_URL } from "../components/SEO";
+
+const ORG_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "jobkhojoAI",
+  url: SITE_URL,
+  logo: `${SITE_URL}/favicon.svg`,
+  sameAs: ["https://instagram.com/jobkhojoAI"],
+};
+
+const WEBSITE_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "jobkhojoAI",
+  url: SITE_URL,
+  potentialAction: {
+    "@type": "SearchAction",
+    target: `${SITE_URL}/?search={search_term_string}#jobs`,
+    "query-input": "required name=search_term_string",
+  },
+};
 
 const FEATURES = [
   {
@@ -88,6 +110,13 @@ export default function Home(){
 
   return (
     <main className="container">
+      <SEO
+        title="jobkhojoAI — Tech Jobs & Internships Across India"
+        description="Daily updated Tech & IT job alerts across India — software jobs, internships, and remote-friendly roles for freshers and experienced professionals, all in one place."
+        path="/"
+      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
       <motion.section
         className="hero video-section"
         initial={{ opacity: 0, y: 24 }}

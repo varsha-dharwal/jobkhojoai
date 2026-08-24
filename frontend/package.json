@@ -9,7 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "sitemap": "node scripts/generate-sitemap.js",
-    "deploy": "vite build && wrangler pages deploy dist --project-name=jobkhojoai"
+    "deploy": "npm run sitemap && vite build && wrangler pages deploy dist --project-name=jobkhojoai"
   },
   "dependencies": {
     "axios": "^1.19.0",

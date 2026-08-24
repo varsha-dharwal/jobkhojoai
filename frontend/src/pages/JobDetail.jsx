@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../api/client";
 import CompanyAvatar from "../components/CompanyAvatar";
 import { timeAgo } from "../utils/timeAgo";
+import SEO from "../components/SEO";
 
 function formatDate(d){
   return new Date(d).toLocaleDateString("en-IN", { day:"2-digit", month:"long", year:"numeric" });
@@ -63,36 +64,10 @@ export default function JobDetail(){
       .catch(err => setState(err.response?.status === 404 ? "notfound" : "error"));
   }, [slug]);
 
-  useEffect(() => {
-    if (!job) return;
-    document.title = `${job.title} — ${job.organization} | jobkhojoAI`;
-
-    // JobPosting structured data for Google Jobs
-    const script = document.createElement("script");
-    script.type = "application/ld+json";
-    script.text = JSON.stringify({
-      "@context": "https://schema.org/",
-      "@type": "JobPosting",
-      title: job.title,
-      description: job.roleDescription || job.title,
-      datePosted: job.createdAt,
-      validThrough: job.lastDate,
-      employmentType: job.category === "Internship" ? "INTERN" : job.category === "Part-time" ? "PART_TIME" : "FULL_TIME",
-      ...(job.remote ? { jobLocationType: "TELECOMMUTE" } : {}),
-      hiringOrganization: { "@type": "Organization", name: job.organization },
-      jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: "IN", addressRegion: job.location } },
-      baseSalary: { "@type": "MonetaryAmount", currency: "INR", value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: "MONTH" } },
-      ...(job.experience ? { experienceRequirements: job.experience } : {}),
-      ...(job.education ? { educationRequirements: job.education } : {}),
-      ...(job.skills ? { skills: job.skills } : {}),
-    });
-    document.head.appendChild(script);
-    return () => document.head.removeChild(script);
-  }, [job]);
-
   if (state === "loading") return <main className="container" style={{paddingTop:40}}>Loading…</main>;
   if (state === "notfound") return (
     <main className="container" style={{paddingTop:40}}>
+      <SEO title="Job Not Found | jobkhojoAI" description="This job listing has expired or the link is incorrect." path={`/jobs/${slug}`} noindex />
       <h2>Job not found</h2>
       <p style={{color:"var(--color-text-secondary)"}}>This job may have expired, or the link may be incorrect.</p>
       <Link to="/" className="btn btn-primary" style={{marginTop:16}}>Back to Home</Link>
@@ -100,8 +75,31 @@ export default function JobDetail(){
   );
   if (state === "error") return <main className="container" style={{paddingTop:40, color:"var(--color-danger)"}}>Something went wrong, please try again.</main>;
 
+  const jobSchema = {
+    "@context": "https://schema.org/",
+    "@type": "JobPosting",
+    title: job.title,
+    description: job.roleDescription || job.title,
+    datePosted: job.createdAt,
+    validThrough: job.lastDate,
+    employmentType: job.category === "Internship" ? "INTERN" : job.category === "Part-time" ? "PART_TIME" : "FULL_TIME",
+    ...(job.remote ? { jobLocationType: "TELECOMMUTE" } : {}),
+    hiringOrganization: { "@type": "Organization", name: job.organization },
+    jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: "IN", addressRegion: job.location } },
+    baseSalary: { "@type": "MonetaryAmount", currency: "INR", value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: "MONTH" } },
+    ...(job.experience ? { experienceRequirements: job.experience } : {}),
+    ...(job.education ? { educationRequirements: job.education } : {}),
+    ...(job.skills ? { skills: job.skills } : {}),
+  };
+
   return (
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720}}>
+      <SEO
+        title={`${job.title} — ${job.organization} | jobkhojoAI`}
+        description={(job.roleDescription || `${job.title} at ${job.organization}. ${job.location} · ${job.category}.`).slice(0, 160)}
+        path={`/jobs/${job.slug}`}
+      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchema) }} />
       <div className="card" style={{padding:24, marginBottom:24, display:"flex", gap:16}}>
         <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={56} />
         <div style={{flex:1, minWidth:0}}>

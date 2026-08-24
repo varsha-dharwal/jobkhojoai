@@ -1,21 +1,19 @@
 // Regenerates frontend/public/sitemap.xml — static pages plus every active job's
 // public /jobs/:slug URL, fetched live from the backend API.
 //
-// Run before each deploy:
-//   SITE_URL=https://jobkhojoai.com API_URL=https://your-backend-domain/api node scripts/generate-sitemap.js
+// Runs automatically as part of `npm run deploy`. For a local dry run against
+// a local backend instead:
+//   API_URL=http://localhost:5000/api node scripts/generate-sitemap.js
 //
 // On Windows PowerShell:
-//   $env:SITE_URL="https://jobkhojoai.com"; $env:API_URL="https://your-backend-domain/api"; node scripts/generate-sitemap.js
-//
-// Both env vars are optional — SITE_URL defaults to https://jobkhojoai.com and
-// API_URL defaults to http://localhost:5000/api (useful for a local dry run).
+//   $env:API_URL="http://localhost:5000/api"; node scripts/generate-sitemap.js
 
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SITE_URL = (process.env.SITE_URL || "https://jobkhojoai.com").replace(/\/$/, "");
-const API_URL = process.env.API_URL || "http://localhost:5000/api";
+const API_URL = process.env.API_URL || "https://jobkhojoai-backend.onrender.com/api";
 
 const today = new Date().toISOString().slice(0, 10);
 

@@ -1,6 +1,13 @@
+import SEO from "../components/SEO";
+
 export default function Privacy(){
   return (
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720, lineHeight:1.7}}>
+      <SEO
+        title="Privacy Policy | jobkhojoAI"
+        description="Read jobkhojoAI's privacy policy. We don't collect your personal application data — Apply Now links take you directly to the employer's official site."
+        path="/privacy-policy"
+      />
       <h1>Privacy Policy</h1>
       <p style={{color:"var(--color-text-secondary)"}}>
         jobkhojoAI does not collect any of your personal application data — the "Apply Now" button takes you

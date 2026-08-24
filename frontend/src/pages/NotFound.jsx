@@ -1,11 +1,12 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import SEO from "../components/SEO";
 
 export default function NotFound(){
-  useEffect(() => { document.title = "Page Not Found | jobkhojoAI"; }, []);
+  const location = useLocation();
 
   return (
     <main className="container" style={{paddingTop:"var(--space-12)", paddingBottom:"var(--space-12)", textAlign:"center"}}>
+      <SEO title="Page Not Found | jobkhojoAI" description="The page you're looking for doesn't exist or may have been moved." path={location.pathname} noindex />
       <p style={{fontSize:13, letterSpacing:2, color:"var(--color-text-tertiary)", textTransform:"uppercase", marginBottom:12}}>
         Error 404
       </p>
