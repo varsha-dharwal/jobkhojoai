@@ -1,17 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 
+const QUIET_VOLUME = 0.15;
+
 export default function VideoBackground({ src, poster }){
   const ref = useRef(null);
   const [failed, setFailed] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (reducedMotion) el.pause();
-    else el.play().catch(() => {});
+    if (reducedMotion) { el.pause(); return; }
+
+    // Try to autoplay with (quiet) sound on load; browsers that block unmuted
+    // autoplay will reject the play() promise, so fall back to muted playback.
+    el.volume = QUIET_VOLUME;
+    el.muted = false;
+    el.play().catch(() => {
+      el.muted = true;
+      setMuted(true);
+      el.play().catch(() => {});
+    });
   }, [reducedMotion]);
 
   if (!src || failed) return null;
@@ -19,8 +30,10 @@ export default function VideoBackground({ src, poster }){
   function toggleSound(){
     const el = ref.current;
     if (!el) return;
-    el.muted = !el.muted;
-    setMuted(el.muted);
+    const nextMuted = !el.muted;
+    if (!nextMuted) el.volume = QUIET_VOLUME;
+    el.muted = nextMuted;
+    setMuted(nextMuted);
     el.play().catch(() => {});
   }
 
@@ -31,8 +44,6 @@ export default function VideoBackground({ src, poster }){
         className="section-video-bg"
         src={src}
         poster={poster}
-        autoPlay={!reducedMotion}
-        muted
         loop
         playsInline
         preload="metadata"

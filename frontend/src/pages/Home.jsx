@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import api from "../api/client";
 import JobCard from "../components/JobCard";
@@ -9,6 +9,9 @@ import FeaturedCompanies from "../components/FeaturedCompanies";
 import JobShelf from "../components/JobShelf";
 import SkeletonCards from "../components/SkeletonCards";
 import SEO, { SITE_URL } from "../components/SEO";
+import { ROADMAP_CATEGORIES } from "../data/roadmaps";
+
+const MotionTagLink = motion.create(Link);
 
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
@@ -55,16 +58,21 @@ const FEATURES = [
   },
 ];
 
-const JOB_ROLES = [
-  "Software Engineer", "Full Stack Developer", "Data Scientist", "DevOps Engineer",
-  "Cloud Architect", "QA / Automation Engineer", "UI/UX Designer", "Product Manager",
-  "Technical Support", "Mobile App Developer",
-];
-
 const SKILLS = [
   "React.js", "Node.js", "Python", "AWS", "Docker", "Java", "TypeScript",
   "SQL", "MongoDB", "Next.js", "Git", "REST APIs",
 ];
+
+// Extra filters driven by the header's search bar (date posted / on-site / experience
+// level) aren't covered by the backend's category+remote params, so they're applied
+// as a client-side pass on top of the fetched list, on top of whatever this page's own
+// search/category/remote controls already narrowed down.
+const EXPERIENCE_LEVEL_TESTS = {
+  fresher: /fresh|entry|graduate|0\s*-?\s*1|intern/i,
+  mid: /mid[\s-]?level|associate|\b[1-4]\+?\s*(years|yrs|yr)\b/i,
+  senior: /senior|lead|principal|manager|\b[5-9]\+?\s*(years|yrs|yr)\b/i,
+};
+const DATE_POSTED_LIMITS_MS = { "24h": 864e5, week: 6048e5, month: 2592e6 };
 
 export default function Home(){
   const location = useLocation();
@@ -77,14 +85,22 @@ export default function Home(){
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Header-only filters (see Navbar) — not shown as controls on this page, only applied.
+  const [onsiteOnly, setOnsiteOnly] = useState(false);
+  const [datePosted, setDatePosted] = useState("");
+  const [experienceLevels, setExperienceLevels] = useState([]);
+
   // Sync filters from the URL — lets internal links (e.g. the header search, the FAQ,
   // or a Featured Companies tile) deep-link into a filtered view even when already on this page.
   useEffect(() => {
     const c = searchParams.get("category");
     setCategory(c === "Full-time" || c === "Part-time" || c === "Internship" ? c : "All");
     setRemoteOnly(searchParams.get("remote") === "true");
+    setOnsiteOnly(searchParams.get("remote") === "false");
     setSearch(searchParams.get("search") || "");
     setCompanyFilter(searchParams.get("company") || "");
+    setDatePosted(searchParams.get("datePosted") || "");
+    setExperienceLevels((searchParams.get("experience") || "").split(",").filter(Boolean));
   }, [searchParams]);
 
   useEffect(() => {
@@ -107,6 +123,16 @@ export default function Home(){
       .catch(() => setError("Couldn't load jobs. Please try again in a moment."))
       .finally(() => setLoading(false));
   }, [category, remoteOnly, search, companyFilter]);
+
+  const visibleJobs = jobs.filter(job => {
+    if (onsiteOnly && job.remote) return false;
+    if (experienceLevels.length){
+      const text = `${job.experience || ""} ${job.title || ""}`;
+      if (!experienceLevels.some(level => EXPERIENCE_LEVEL_TESTS[level].test(text))) return false;
+    }
+    if (datePosted && Date.now() - new Date(job.createdAt).getTime() > DATE_POSTED_LIMITS_MS[datePosted]) return false;
+    return true;
+  });
 
   return (
     <main className="container">
@@ -193,10 +219,12 @@ export default function Home(){
         <div className="tag-columns">
           <div>
             <h3 style={{fontSize:14, textTransform:"uppercase", letterSpacing:.5, color:"var(--color-text-tertiary)", marginBottom:16}}>Popular Job Roles</h3>
+            <p style={{margin:"-8px 0 16px", fontSize:13, color:"var(--color-text-tertiary)"}}>Tap a role to see its full career roadmap.</p>
             <div className="tag-pill-group">
-              {JOB_ROLES.map((r, i) => (
-                <motion.span
-                  key={r}
+              {ROADMAP_CATEGORIES.map((r, i) => (
+                <MotionTagLink
+                  key={r.slug}
+                  to={`/roadmap/${r.slug}`}
                   className="tag-pill"
                   initial={{ opacity: 0, y: 10, scale: 0.9 }}
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -204,8 +232,8 @@ export default function Home(){
                   transition={{ duration: 0.3, delay: i * 0.04, ease: "easeOut" }}
                   whileHover={{ scale: 1.06, borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
                 >
-                  {r}
-                </motion.span>
+                  {r.label}
+                </MotionTagLink>
               ))}
             </div>
           </div>
@@ -293,7 +321,7 @@ export default function Home(){
 
         {loading && <SkeletonCards count={6} />}
         {error && <p style={{color:"var(--color-danger)"}} role="alert">{error}</p>}
-        {!loading && !error && jobs.length === 0 && (
+        {!loading && !error && visibleJobs.length === 0 && (
           <motion.div className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
@@ -307,9 +335,9 @@ export default function Home(){
         )}
 
         <AnimatePresence mode="popLayout">
-          {jobs.length > 0 && (
+          {visibleJobs.length > 0 && (
             <div className="jobs-grid" style={{marginBottom:40}}>
-              {jobs.map((job, i) => <JobCard key={job._id} job={job} index={i} />)}
+              {visibleJobs.map((job, i) => <JobCard key={job._id} job={job} index={i} />)}
             </div>
           )}
         </AnimatePresence>

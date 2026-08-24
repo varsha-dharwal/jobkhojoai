@@ -5,10 +5,12 @@ import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CustomCursor from "./components/CustomCursor";
-import ScrollTopButton from "./components/ScrollTopButton";
+import AskAI from "./components/AskAI";
 
 import Home from "./pages/Home";
 import JobDetail from "./pages/JobDetail";
+import SavedJobs from "./pages/SavedJobs";
+import RoadmapDetail from "./pages/RoadmapDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
@@ -24,12 +26,14 @@ export default function App(){
     <MotionConfig reducedMotion="user">
       <BrowserRouter>
         <CustomCursor />
-        <ScrollTopButton />
+        <AskAI />
         <Navbar />
         <ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/jobs/:slug" element={<JobDetail />} />
+            <Route path="/saved-jobs" element={<SavedJobs />} />
+            <Route path="/roadmap/:slug" element={<RoadmapDetail />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<Privacy />} />

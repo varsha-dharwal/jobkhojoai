@@ -1,14 +1,32 @@
-import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/logo.png";
+import FilterDropdown from "./FilterDropdown";
+import QuickActionsMenu from "./QuickActionsMenu";
 
 const links = [
   { to: "/", label: "Home", end: true },
-  { to: "/about", label: "About" },
-  { to: "/contact", label: "Contact" },
-  { to: "/privacy-policy", label: "Privacy" },
-  { to: "/terms", label: "Terms" },
+];
+
+const DATE_OPTIONS = [
+  { value: "24h", label: "Past 24 hours" },
+  { value: "week", label: "Past week" },
+  { value: "month", label: "Past month" },
+];
+const LOCATION_OPTIONS = [
+  { value: "remote", label: "Remote" },
+  { value: "onsite", label: "On-site" },
+];
+const EXPERIENCE_OPTIONS = [
+  { value: "fresher", label: "Fresher / Entry-level" },
+  { value: "mid", label: "Mid-level (1–4 yrs)" },
+  { value: "senior", label: "Senior (5+ yrs)" },
+];
+const EMPLOYMENT_OPTIONS = [
+  { value: "Full-time", label: "Full-time" },
+  { value: "Part-time", label: "Part-time" },
+  { value: "Internship", label: "Internship" },
 ];
 
 function SearchIcon(){
@@ -23,12 +41,40 @@ function SearchIcon(){
 export default function Navbar(){
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const dateFilter = searchParams.get("datePosted") || "";
+  const remoteParam = searchParams.get("remote");
+  const locationFilter = remoteParam === "true" ? "remote" : remoteParam === "false" ? "onsite" : "";
+  const experienceFilter = (searchParams.get("experience") || "").split(",").filter(Boolean);
+  const employmentFilter = searchParams.get("category") || "";
+
+  useEffect(() => {
+    setQuery(searchParams.get("search") || "");
+    if (searchParams.get("search") || searchParams.get("category") || searchParams.get("remote")
+        || searchParams.get("datePosted") || searchParams.get("experience")) {
+      setShowFilters(true);
+    }
+  }, [searchParams]);
+
+  // Merges a partial filter update into the current URL query and always lands on the
+  // homepage's jobs section, since that's the only place these filters take effect.
+  function goToJobs(patch){
+    const params = new URLSearchParams(searchParams);
+    Object.entries(patch).forEach(([key, value]) => {
+      const isEmpty = value === "" || value === undefined || (Array.isArray(value) && value.length === 0);
+      if (isEmpty) params.delete(key);
+      else params.set(key, Array.isArray(value) ? value.join(",") : value);
+    });
+    navigate(`/?${params.toString()}#jobs`);
+  }
 
   function submitSearch(e){
     e.preventDefault();
-    const q = query.trim();
-    navigate(q ? `/?search=${encodeURIComponent(q)}#jobs` : "/#jobs");
+    goToJobs({ search: query.trim() || undefined });
+    setShowFilters(true);
     setOpen(false);
   }
 
@@ -57,6 +103,7 @@ export default function Navbar(){
             {links.map(l => (
               <NavLink key={l.to} to={l.to} end={l.end}>{l.label}</NavLink>
             ))}
+            <QuickActionsMenu />
           </nav>
 
           <button
@@ -77,6 +124,17 @@ export default function Navbar(){
           </button>
         </div>
       </div>
+
+      {showFilters && (
+        <div className="container header-filter-row">
+          <div className="filter-pills" role="group" aria-label="Advanced job filters">
+            <FilterDropdown label="Date posted" options={DATE_OPTIONS} selected={dateFilter} onApply={v => goToJobs({ datePosted: v })} />
+            <FilterDropdown label="Location" options={LOCATION_OPTIONS} selected={locationFilter} onApply={v => goToJobs({ remote: v === "remote" ? "true" : v === "onsite" ? "false" : "" })} />
+            <FilterDropdown label="Experience level" options={EXPERIENCE_OPTIONS} selected={experienceFilter} multiSelect onApply={v => goToJobs({ experience: v })} />
+            <FilterDropdown label="Employment type" options={EMPLOYMENT_OPTIONS} selected={employmentFilter} onApply={v => goToJobs({ category: v })} />
+          </div>
+        </div>
+      )}
 
       <AnimatePresence initial={false}>
         {open && (
@@ -103,6 +161,9 @@ export default function Navbar(){
               {links.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setOpen(false)}>{l.label}</NavLink>
               ))}
+              <div style={{marginTop:8}}>
+                <QuickActionsMenu onNavigate={() => setOpen(false)} />
+              </div>
             </nav>
           </motion.div>
         )}
