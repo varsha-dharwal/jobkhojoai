@@ -10,15 +10,7 @@ export default function JourneyRoadmap({ steps }){
       {steps.map((step, i) => (
         <div className="journey-step" key={step.title}>
           <div className="journey-node-col">
-            <motion.div
-              className="journey-node"
-              initial={{ scale: 0.6, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-            >
-              {i + 1}
-            </motion.div>
+            <div className="journey-node">{i + 1}</div>
             {i < steps.length - 1 && (
               <motion.div
                 className="journey-connector"
