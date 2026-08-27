@@ -22,6 +22,10 @@ export default function CompanyAvatar({ name, logoUrl, size = 44 }){
         src={logoUrl}
         alt={`${name} logo`}
         className="company-avatar"
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
         style={{ width:size, height:size, objectFit:"contain", background:"#fff" }}
         onError={() => setFailed(true)}
       />

@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MotionConfig } from "motion/react";
 import Navbar from "./components/Navbar";
@@ -8,18 +9,19 @@ import CustomCursor from "./components/CustomCursor";
 import AskAI from "./components/AskAI";
 
 import Home from "./pages/Home";
-import JobDetail from "./pages/JobDetail";
-import SavedJobs from "./pages/SavedJobs";
-import RoadmapDetail from "./pages/RoadmapDetail";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import NotFound from "./pages/NotFound";
 
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminJobs from "./pages/admin/AdminJobs";
-import AdminJobForm from "./pages/admin/AdminJobForm";
+const JobDetail = lazy(() => import("./pages/JobDetail"));
+const SavedJobs = lazy(() => import("./pages/SavedJobs"));
+const RoadmapDetail = lazy(() => import("./pages/RoadmapDetail"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminJobs = lazy(() => import("./pages/admin/AdminJobs"));
+const AdminJobForm = lazy(() => import("./pages/admin/AdminJobForm"));
 
 export default function App(){
   return (
@@ -29,23 +31,25 @@ export default function App(){
         <AskAI />
         <Navbar />
         <ErrorBoundary>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/jobs/:slug" element={<JobDetail />} />
-            <Route path="/saved-jobs" element={<SavedJobs />} />
-            <Route path="/roadmap/:slug" element={<RoadmapDetail />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy-policy" element={<Privacy />} />
-            <Route path="/terms" element={<Terms />} />
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/jobs/:slug" element={<JobDetail />} />
+              <Route path="/saved-jobs" element={<SavedJobs />} />
+              <Route path="/roadmap/:slug" element={<RoadmapDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy-policy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
 
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/jobs" element={<ProtectedRoute><AdminJobs /></ProtectedRoute>} />
-            <Route path="/admin/jobs/new" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
-            <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/jobs" element={<ProtectedRoute><AdminJobs /></ProtectedRoute>} />
+              <Route path="/admin/jobs/new" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
+              <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </ErrorBoundary>
         <Footer />
       </BrowserRouter>

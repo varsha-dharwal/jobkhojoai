@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import zlib from "zlib";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import jobRoutes from "./routes/jobs.js";
@@ -9,6 +10,23 @@ import aiRoutes from "./routes/ai.js";
 dotenv.config();
 
 const app = express();
+
+// Gzip JSON responses when the client supports it — cuts payload size for the
+// jobs list/AI replies without pulling in the `compression` package.
+app.use((req, res, next) => {
+  if (!(req.headers["accept-encoding"] || "").includes("gzip")) return next();
+  const originalSend = res.send.bind(res);
+  res.send = (body) => {
+    if (typeof body !== "string" && !Buffer.isBuffer(body)) return originalSend(body);
+    zlib.gzip(Buffer.isBuffer(body) ? body : Buffer.from(body), (err, compressed) => {
+      if (err) return originalSend(body);
+      res.set("Content-Encoding", "gzip");
+      res.set("Vary", "Accept-Encoding");
+      originalSend(compressed);
+    });
+  };
+  next();
+});
 
 const allowedOrigins = (process.env.CLIENT_URL || "*")
   .split(",")

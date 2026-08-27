@@ -25,6 +25,30 @@ export default function VideoBackground({ src, poster }){
     });
   }, [reducedMotion]);
 
+  // Browsers require at least one user interaction with the page before they'll
+  // allow sound at all — this is a hard policy no site code can bypass. The best
+  // we can do is turn sound on the moment that first interaction happens, rather
+  // than making the visitor hunt down the mute icon themselves.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reducedMotion) return;
+
+    function unmuteOnFirstInteraction(e){
+      if (e.target?.closest?.(".video-sound-toggle")) return;
+      if (!el.muted) return;
+      el.volume = QUIET_VOLUME;
+      el.muted = false;
+      setMuted(false);
+      el.play().catch(() => {});
+    }
+    window.addEventListener("pointerdown", unmuteOnFirstInteraction, { once: true });
+    window.addEventListener("keydown", unmuteOnFirstInteraction, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unmuteOnFirstInteraction);
+      window.removeEventListener("keydown", unmuteOnFirstInteraction);
+    };
+  }, [reducedMotion]);
+
   if (!src || failed) return null;
 
   function toggleSound(){
@@ -47,6 +71,7 @@ export default function VideoBackground({ src, poster }){
         loop
         playsInline
         preload="metadata"
+        fetchpriority="high"
         onError={() => setFailed(true)}
       />
       <div className="section-video-overlay" aria-hidden="true" />

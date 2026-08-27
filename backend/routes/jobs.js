@@ -28,6 +28,7 @@ router.get("/", async (req, res) => {
     let query = Job.find(filter).sort({ createdAt: -1 });
     if (limit) query = query.limit(Number(limit));
     const jobs = await query;
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: "Could not load jobs", error: err.message });
@@ -45,6 +46,7 @@ router.get("/meta/companies", async (req, res) => {
       { $limit: 12 },
       { $project: { _id: 0, organization: "$_id", jobCount: 1, logoUrl: 1 } },
     ]);
+    res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
     res.json(companies);
   } catch (err) {
     res.status(500).json({ message: "Could not load companies", error: err.message });
@@ -56,6 +58,7 @@ router.get("/:slug", async (req, res) => {
   try {
     const job = await Job.findOne({ slug: req.params.slug });
     if (!job) return res.status(404).json({ message: "Job not found" });
+    res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
     res.json(job);
   } catch (err) {
     res.status(500).json({ message: "Could not load job", error: err.message });

@@ -83,7 +83,7 @@ export default function Navbar(){
       <div className="container site-header-inner">
         <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} style={{display:"inline-flex"}}>
           <Link to="/" className="logo-link" aria-label="jobkhojoAI home" onClick={() => setOpen(false)}>
-            <img src={logo} alt="jobkhojoAI logo" />
+            <img src={logo} alt="jobkhojoAI logo" width="100" height="100" fetchPriority="high" />
           </Link>
         </motion.div>
 
