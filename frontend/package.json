@@ -12,7 +12,9 @@
     "deploy": "npm run sitemap && vite build && wrangler pages deploy dist --project-name=jobkhojoai"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.9.0",
     "axios": "^1.19.0",
+    "lucide-react": "^1.39.0",
     "motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

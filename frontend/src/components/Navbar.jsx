@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import logo from "../assets/logo.png";
 import FilterDropdown from "./FilterDropdown";
 import QuickActionsMenu from "./QuickActionsMenu";
+import CareerGuideMenu, { CAREER_GUIDE_LINKS } from "./CareerGuideMenu";
 
 const links = [
   { to: "/", label: "Home", end: true },
@@ -103,6 +104,7 @@ export default function Navbar(){
             {links.map(l => (
               <NavLink key={l.to} to={l.to} end={l.end}>{l.label}</NavLink>
             ))}
+            <CareerGuideMenu />
             <QuickActionsMenu />
           </nav>
 
@@ -160,6 +162,10 @@ export default function Navbar(){
               </form>
               {links.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setOpen(false)}>{l.label}</NavLink>
+              ))}
+              <span className="nav-mobile-group-label">Career Guide</span>
+              {CAREER_GUIDE_LINKS.map(l => (
+                <NavLink key={l.to} to={l.to} className="nav-mobile-sublink" onClick={() => setOpen(false)}>{l.label}</NavLink>
               ))}
               <div style={{marginTop:8}}>
                 <QuickActionsMenu onNavigate={() => setOpen(false)} />
