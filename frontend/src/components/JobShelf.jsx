@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import api from "../api/client";
-import JobCard from "./JobCard";
+import JobSlider from "./JobSlider";
 import SkeletonCards from "./SkeletonCards";
 
 export default function JobShelf({ title, subtitle, params, viewAllHref }){
@@ -11,7 +11,7 @@ export default function JobShelf({ title, subtitle, params, viewAllHref }){
 
   useEffect(() => {
     setLoading(true);
-    api.get("/jobs", { params: { ...params, limit: 4 } })
+    api.get("/jobs", { params: { ...params, limit: 12 } })
       .then(res => setJobs(res.data))
       .catch(() => setJobs([]))
       .finally(() => setLoading(false));
@@ -36,11 +36,7 @@ export default function JobShelf({ title, subtitle, params, viewAllHref }){
         </div>
         <Link to={viewAllHref} className="shelf-view-all">View all →</Link>
       </div>
-      {loading ? <SkeletonCards count={4} /> : (
-        <div className="jobs-grid">
-          {jobs.map((job, i) => <JobCard key={job._id} job={job} index={i} />)}
-        </div>
-      )}
+      {loading ? <SkeletonCards count={4} /> : <JobSlider jobs={jobs} />}
     </motion.section>
   );
 }

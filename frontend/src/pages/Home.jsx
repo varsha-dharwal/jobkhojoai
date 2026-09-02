@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useSearchParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import api from "../api/client";
-import JobCard from "../components/JobCard";
+import JobSlider from "../components/JobSlider";
 import VideoBackground from "../components/VideoBackground";
 import FAQSection from "../components/FAQSection";
 import FeaturedCompanies from "../components/FeaturedCompanies";
@@ -334,13 +334,11 @@ export default function Home(){
           </motion.div>
         )}
 
-        <AnimatePresence mode="popLayout">
-          {visibleJobs.length > 0 && (
-            <div className="jobs-grid" style={{marginBottom:40}}>
-              {visibleJobs.map((job, i) => <JobCard key={job._id} job={job} index={i} />)}
-            </div>
-          )}
-        </AnimatePresence>
+        {visibleJobs.length > 0 && (
+          <div style={{marginBottom:40}}>
+            <JobSlider jobs={visibleJobs} />
+          </div>
+        )}
       </div>
 
       <FeaturedCompanies />
