@@ -5,7 +5,7 @@ export default function Terms(){
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720, lineHeight:1.7}}>
       <SEO
         title="Terms & Conditions | jobkhojoAI"
-        description="Terms and conditions for using jobkhojoAI, a platform aggregating publicly available tech job and internship listings across India."
+        description="Terms and conditions for using jobkhojoAI, a platform aggregating publicly available tech job and internship listings across India and the USA."
         path="/terms"
       />
       <h1>Terms &amp; Conditions</h1>

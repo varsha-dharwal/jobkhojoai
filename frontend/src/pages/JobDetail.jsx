@@ -5,6 +5,7 @@ import CompanyAvatar from "../components/CompanyAvatar";
 import { timeAgo } from "../utils/timeAgo";
 import { isJobSaved, toggleSavedJob } from "../utils/savedJobs";
 import SEO from "../components/SEO";
+import { getJobCountry } from "../utils/jobCountry";
 
 function BookmarkIcon({ filled }){
   return (
@@ -123,6 +124,11 @@ export default function JobDetail(){
   );
   if (state === "error") return <main className="container" style={{paddingTop:40, color:"var(--color-danger)"}}>Something went wrong, please try again.</main>;
 
+  // Google for Jobs (the main US search surface for job listings) keys heavily off
+  // addressCountry/currency in this schema — getting them wrong can keep a US job
+  // out of US results entirely, so these are derived per-job rather than assumed to be India.
+  const jobIsUSA = getJobCountry(job) === "USA";
+
   const jobSchema = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
@@ -133,8 +139,8 @@ export default function JobDetail(){
     employmentType: job.category === "Internship" ? "INTERN" : job.category === "Part-time" ? "PART_TIME" : "FULL_TIME",
     ...(job.remote ? { jobLocationType: "TELECOMMUTE" } : {}),
     hiringOrganization: { "@type": "Organization", name: job.organization },
-    jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: "IN", addressRegion: job.location } },
-    baseSalary: { "@type": "MonetaryAmount", currency: "INR", value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: "MONTH" } },
+    jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressCountry: jobIsUSA ? "US" : "IN", addressRegion: job.location } },
+    baseSalary: { "@type": "MonetaryAmount", currency: jobIsUSA ? "USD" : "INR", value: { "@type": "QuantitativeValue", minValue: job.salaryMin, maxValue: job.salaryMax, unitText: jobIsUSA ? "YEAR" : "MONTH" } },
     ...(job.experience ? { experienceRequirements: job.experience } : {}),
     ...(job.education ? { educationRequirements: job.education } : {}),
     ...(job.skills ? { skills: job.skills } : {}),

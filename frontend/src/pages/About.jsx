@@ -5,7 +5,7 @@ export default function About(){
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720, lineHeight:1.7}}>
       <SEO
         title="About Us | jobkhojoAI"
-        description="Learn about jobkhojoAI — a tech job-alert platform bringing verified IT & software jobs, internships, and remote-friendly roles to job seekers across India."
+        description="Learn about jobkhojoAI — a tech job-alert platform bringing verified IT & software jobs, internships, and remote-friendly roles to job seekers across India and the USA."
         path="/about"
       />
       <h1>About jobkhojoAI</h1>

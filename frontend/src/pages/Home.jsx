@@ -10,6 +10,7 @@ import JobShelf from "../components/JobShelf";
 import SkeletonCards from "../components/SkeletonCards";
 import SEO, { SITE_URL } from "../components/SEO";
 import { ROADMAP_CATEGORIES } from "../data/roadmaps";
+import { getJobCountry } from "../utils/jobCountry";
 
 const MotionTagLink = motion.create(Link);
 
@@ -20,6 +21,7 @@ const ORG_SCHEMA = {
   url: SITE_URL,
   logo: `${SITE_URL}/favicon.svg`,
   sameAs: ["https://instagram.com/jobkhojoAI"],
+  areaServed: ["IN", "US"],
 };
 
 const WEBSITE_SCHEMA = {
@@ -73,14 +75,6 @@ const EXPERIENCE_LEVEL_TESTS = {
   senior: /senior|lead|principal|manager|\b[5-9]\+?\s*(years|yrs|yr)\b/i,
 };
 const DATE_POSTED_LIMITS_MS = { "24h": 864e5, week: 6048e5, month: 2592e6 };
-
-// Jobs don't have a dedicated country field yet, so the region filter (see Navbar)
-// infers it from the free-text location string. This board is India-first, so
-// anything that doesn't explicitly say US/USA/United States is treated as India.
-const US_LOCATION_RE = /\b(united states|usa|u\.s\.a?\.?)\b/i;
-function jobCountry(job){
-  return US_LOCATION_RE.test(job.location || "") ? "USA" : "India";
-}
 
 export default function Home(){
   const location = useLocation();
@@ -137,7 +131,7 @@ export default function Home(){
   const visibleJobs = jobs.filter(job => {
     if (onsiteOnly && job.remote) return false;
     // Remote jobs are shown for either region — only on-site jobs get filtered by country.
-    if (country && !job.remote && jobCountry(job) !== country) return false;
+    if (country && !job.remote && getJobCountry(job) !== country) return false;
     if (experienceLevels.length){
       const text = `${job.experience || ""} ${job.title || ""}`;
       if (!experienceLevels.some(level => EXPERIENCE_LEVEL_TESTS[level].test(text))) return false;
@@ -149,8 +143,8 @@ export default function Home(){
   return (
     <main className="container">
       <SEO
-        title="jobkhojoAI — Tech Jobs & Internships Across India"
-        description="Daily updated Tech & IT job alerts across India — software jobs, internships, and remote-friendly roles for freshers and experienced professionals, all in one place."
+        title="jobkhojoAI — Tech Jobs & Internships in India & the USA"
+        description="Daily updated Tech & IT job alerts across India and the USA — software jobs, internships, and remote-friendly roles for freshers and experienced professionals, all in one place."
         path="/"
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />

@@ -5,7 +5,7 @@ export default function Contact(){
     <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720, lineHeight:1.7}}>
       <SEO
         title="Contact Us | jobkhojoAI"
-        description="Get in touch with jobkhojoAI for queries, corrections, or suggestions about tech job and internship listings across India."
+        description="Get in touch with jobkhojoAI for queries, corrections, or suggestions about tech job and internship listings across India and the USA."
         path="/contact"
       />
       <h1>Contact Us</h1>
