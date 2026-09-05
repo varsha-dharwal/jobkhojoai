@@ -74,6 +74,14 @@ const EXPERIENCE_LEVEL_TESTS = {
 };
 const DATE_POSTED_LIMITS_MS = { "24h": 864e5, week: 6048e5, month: 2592e6 };
 
+// Jobs don't have a dedicated country field yet, so the region filter (see Navbar)
+// infers it from the free-text location string. This board is India-first, so
+// anything that doesn't explicitly say US/USA/United States is treated as India.
+const US_LOCATION_RE = /\b(united states|usa|u\.s\.a?\.?)\b/i;
+function jobCountry(job){
+  return US_LOCATION_RE.test(job.location || "") ? "USA" : "India";
+}
+
 export default function Home(){
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -89,6 +97,7 @@ export default function Home(){
   const [onsiteOnly, setOnsiteOnly] = useState(false);
   const [datePosted, setDatePosted] = useState("");
   const [experienceLevels, setExperienceLevels] = useState([]);
+  const [country, setCountry] = useState("");
 
   // Sync filters from the URL — lets internal links (e.g. the header search, the FAQ,
   // or a Featured Companies tile) deep-link into a filtered view even when already on this page.
@@ -101,6 +110,7 @@ export default function Home(){
     setCompanyFilter(searchParams.get("company") || "");
     setDatePosted(searchParams.get("datePosted") || "");
     setExperienceLevels((searchParams.get("experience") || "").split(",").filter(Boolean));
+    setCountry(searchParams.get("country") || "");
   }, [searchParams]);
 
   useEffect(() => {
@@ -126,6 +136,8 @@ export default function Home(){
 
   const visibleJobs = jobs.filter(job => {
     if (onsiteOnly && job.remote) return false;
+    // Remote jobs are shown for either region — only on-site jobs get filtered by country.
+    if (country && !job.remote && jobCountry(job) !== country) return false;
     if (experienceLevels.length){
       const text = `${job.experience || ""} ${job.title || ""}`;
       if (!experienceLevels.some(level => EXPERIENCE_LEVEL_TESTS[level].test(text))) return false;
@@ -317,6 +329,13 @@ export default function Home(){
           <div className="active-filter-chip">
             Showing jobs at <strong>{companyFilter}</strong>
             <button type="button" onClick={() => setCompanyFilter("")} aria-label={`Clear ${companyFilter} filter`}>×</button>
+          </div>
+        )}
+
+        {country && (
+          <div className="active-filter-chip">
+            Showing <strong>{country}</strong> jobs (incl. remote)
+            <button type="button" onClick={() => setCountry("")} aria-label={`Clear ${country} filter`}>×</button>
           </div>
         )}
 

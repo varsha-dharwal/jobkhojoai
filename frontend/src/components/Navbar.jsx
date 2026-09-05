@@ -29,6 +29,10 @@ const EMPLOYMENT_OPTIONS = [
   { value: "Part-time", label: "Part-time" },
   { value: "Internship", label: "Internship" },
 ];
+const REGION_OPTIONS = [
+  { value: "India", label: "India" },
+  { value: "USA", label: "USA" },
+];
 
 function SearchIcon(){
   return (
@@ -51,6 +55,7 @@ export default function Navbar(){
   const locationFilter = remoteParam === "true" ? "remote" : remoteParam === "false" ? "onsite" : "";
   const experienceFilter = (searchParams.get("experience") || "").split(",").filter(Boolean);
   const employmentFilter = searchParams.get("category") || "";
+  const regionFilter = searchParams.get("country") || "";
 
   useEffect(() => {
     setQuery(searchParams.get("search") || "");
@@ -104,6 +109,7 @@ export default function Navbar(){
             {links.map(l => (
               <NavLink key={l.to} to={l.to} end={l.end}>{l.label}</NavLink>
             ))}
+            <FilterDropdown label="Region" options={REGION_OPTIONS} selected={regionFilter} onApply={v => goToJobs({ country: v })} />
             <CareerGuideMenu />
             <QuickActionsMenu />
           </nav>
@@ -163,6 +169,9 @@ export default function Navbar(){
               {links.map(l => (
                 <NavLink key={l.to} to={l.to} end={l.end} onClick={() => setOpen(false)}>{l.label}</NavLink>
               ))}
+              <div style={{margin:"4px 0"}}>
+                <FilterDropdown label="Region" options={REGION_OPTIONS} selected={regionFilter} onApply={v => { goToJobs({ country: v }); setOpen(false); }} />
+              </div>
               <span className="nav-mobile-group-label">Career Guide</span>
               {CAREER_GUIDE_LINKS.map(l => (
                 <NavLink key={l.to} to={l.to} className="nav-mobile-sublink" onClick={() => setOpen(false)}>{l.label}</NavLink>
