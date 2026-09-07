@@ -9,10 +9,51 @@ import FeaturedCompanies from "../components/FeaturedCompanies";
 import JobShelf from "../components/JobShelf";
 import SkeletonCards from "../components/SkeletonCards";
 import SEO, { SITE_URL } from "../components/SEO";
-import { ROADMAP_CATEGORIES } from "../data/roadmaps";
+import { ROADMAP_CATEGORIES, ROADMAPS } from "../data/roadmaps";
+import { SKILL_ROADMAP_CATEGORIES } from "../data/skillRoadmaps";
 import { getJobCountry } from "../utils/jobCountry";
+import { slugify } from "../utils/slugify";
 
 const MotionTagLink = motion.create(Link);
+
+function RoadmapCardIcon(){
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
+// One stacked, full-width block: a centered pill badge as the section label, then a
+// 3-column grid of card-buttons — matches the roadmap.sh layout pattern (stacked
+// groups of a card grid each), redone in jobkhojoAI's own dark/teal theme.
+function RoadmapGridBlock({ badge, subtitle, items, hrefFor }){
+  return (
+    <div className="roadmap-grid-block">
+      <div className="roadmap-grid-badge-row">
+        <span className="roadmap-grid-badge">{badge}</span>
+      </div>
+      {subtitle && <p className="roadmap-grid-subtitle">{subtitle}</p>}
+      <div className="roadmap-card-grid">
+        {items.map((item, i) => (
+          <MotionTagLink
+            key={item.slug}
+            to={hrefFor(item)}
+            className="roadmap-card"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.3, delay: i * 0.03, ease: "easeOut" }}
+            whileHover={{ borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
+          >
+            <span>{item.label}</span>
+            <RoadmapCardIcon />
+          </MotionTagLink>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
@@ -36,34 +77,13 @@ const WEBSITE_SCHEMA = {
   },
 };
 
-const FEATURES = [
-  {
-    title: "Verified Tech Jobs",
-    body: "We only list real IT & software roles — no spam, no fake postings, just genuine tech opportunities.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none"><path d="M9 12.5 11 14.5 15.5 10M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-    ),
-  },
-  {
-    title: "Fresher + Experienced Friendly",
-    body: "From your first internship to a senior engineering role — jobkhojoAI covers every stage of a tech career.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0ZM4 21a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-    ),
-  },
-  {
-    title: "Remote & WFH Ready",
-    body: "Filter for work-from-home and remote-friendly roles so you can find tech jobs that fit your life.",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none"><path d="M3 11.5 12 4l9 7.5M5.5 10v9a1 1 0 0 0 1 1H9v-5.5h6V20h2.5a1 1 0 0 0 1-1v-9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-    ),
-  },
-];
-
-const SKILLS = [
-  "React.js", "Node.js", "Python", "AWS", "Docker", "Java", "TypeScript",
-  "SQL", "MongoDB", "Next.js", "Git", "REST APIs",
-];
+// Project Ideas pulls real project names straight out of each role roadmap's own
+// "Projects" step (data/roadmaps.js) instead of duplicating fresh content — the anchor
+// lets a click land directly on that step inside the full roadmap page.
+const PROJECT_CATEGORIES = ROADMAP_CATEGORIES.map(r => {
+  const projectsStep = ROADMAPS[r.slug]?.steps.find(s => s.topics?.[0]?.subject === "Projects");
+  return projectsStep ? { slug: r.slug, label: r.label, anchor: slugify(projectsStep.title) } : null;
+}).filter(Boolean);
 
 // Extra filters driven by the header's search bar (date posted / on-site / experience
 // level) aren't covered by the backend's category+remote params, so they're applied
@@ -183,35 +203,6 @@ export default function Home(){
       </motion.section>
 
       <motion.section
-        style={{marginBottom:"var(--space-12)"}}
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="section-heading">
-          <h2>Why jobkhojoAI</h2>
-          <p>Built to make finding your next tech role fast, honest, and genuinely useful.</p>
-        </div>
-        <div className="feature-grid">
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              className="card feature-card"
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.4, delay: i * 0.08, ease: "easeOut" }}
-            >
-              <div className="feature-icon" aria-hidden="true">{f.icon}</div>
-              <h3 style={{margin:"0 0 8px", fontSize:17}}>{f.title}</h3>
-              <p style={{margin:0, color:"var(--color-text-secondary)", fontSize:14, lineHeight:1.6}}>{f.body}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
-
-      <motion.section
         id="roadmaps"
         style={{marginBottom:"var(--space-12)", scrollMarginTop:90}}
         initial={{ opacity: 0, y: 16 }}
@@ -220,49 +211,28 @@ export default function Home(){
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <div className="section-heading">
-          <h2>Trending Tech Roles &amp; Skills</h2>
-          <p>The IT job titles and skills employers are hiring for right now.</p>
+          <h2>Roadmaps &amp; Project Ideas</h2>
+          <p>Pick a role, go deep on a skill, or grab a project idea — all mapped to what employers are hiring for right now.</p>
         </div>
-        <div className="tag-columns">
-          <div>
-            <h3 style={{fontSize:14, textTransform:"uppercase", letterSpacing:.5, color:"var(--color-text-tertiary)", marginBottom:16}}>Popular Job Roles</h3>
-            <p style={{margin:"-8px 0 16px", fontSize:13, color:"var(--color-text-tertiary)"}}>Tap a role to see its full career roadmap.</p>
-            <div className="tag-pill-group">
-              {ROADMAP_CATEGORIES.map((r, i) => (
-                <MotionTagLink
-                  key={r.slug}
-                  to={`/roadmap/${r.slug}`}
-                  className="tag-pill"
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.3, delay: i * 0.04, ease: "easeOut" }}
-                  whileHover={{ scale: 1.06, borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
-                >
-                  {r.label}
-                </MotionTagLink>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h3 style={{fontSize:14, textTransform:"uppercase", letterSpacing:.5, color:"var(--color-text-tertiary)", marginBottom:16}}>High-Demand Skills</h3>
-            <div className="tag-pill-group">
-              {SKILLS.map((s, i) => (
-                <motion.span
-                  key={s}
-                  className="tag-pill"
-                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ duration: 0.3, delay: i * 0.04, ease: "easeOut" }}
-                  whileHover={{ scale: 1.06, borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
-                >
-                  {s}
-                </motion.span>
-              ))}
-            </div>
-          </div>
-        </div>
+
+        <RoadmapGridBlock
+          badge="Role-based Roadmaps"
+          subtitle="Tap a role to see its full career roadmap."
+          items={ROADMAP_CATEGORIES}
+          hrefFor={r => `/roadmap/${r.slug}`}
+        />
+        <RoadmapGridBlock
+          badge="Skill-based Roadmaps"
+          subtitle="Going deep on one skill? Start here."
+          items={SKILL_ROADMAP_CATEGORIES}
+          hrefFor={s => `/skill-roadmap/${s.slug}`}
+        />
+        <RoadmapGridBlock
+          badge="Project Ideas"
+          subtitle="Real build ideas, pulled straight from each roadmap."
+          items={PROJECT_CATEGORIES}
+          hrefFor={p => `/roadmap/${p.slug}#${p.anchor}`}
+        />
       </motion.section>
 
       <div id="jobs">

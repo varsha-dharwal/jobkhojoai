@@ -13,6 +13,7 @@ import Home from "./pages/Home";
 const JobDetail = lazy(() => import("./pages/JobDetail"));
 const SavedJobs = lazy(() => import("./pages/SavedJobs"));
 const RoadmapDetail = lazy(() => import("./pages/RoadmapDetail"));
+const SkillRoadmapDetail = lazy(() => import("./pages/SkillRoadmapDetail"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Privacy = lazy(() => import("./pages/Privacy"));
@@ -39,6 +40,7 @@ export default function App(){
               <Route path="/jobs/:slug" element={<JobDetail />} />
               <Route path="/saved-jobs" element={<SavedJobs />} />
               <Route path="/roadmap/:slug" element={<RoadmapDetail />} />
+              <Route path="/skill-roadmap/:slug" element={<SkillRoadmapDetail />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<Privacy />} />

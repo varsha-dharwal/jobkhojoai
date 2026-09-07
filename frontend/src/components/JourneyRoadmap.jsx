@@ -1,51 +1,77 @@
 import { motion } from "motion/react";
+import { slugify } from "../utils/slugify";
 
-// Simple vertical timeline: numbered circle per step, connected by a dashed line
-// that draws itself in (top to bottom) as each step scrolls into view. Each step's
-// title sits next to one card per subject it covers (e.g. "HTML" and "CSS" get
-// their own separate cards) — if a card's topics don't fit, it scrolls horizontally.
-export default function JourneyRoadmap({ steps }){
+// Flowchart-style roadmap: a center spine with each step as a highlighted node sitting
+// on it, connected by a dashed branch line to a card of that step's topics/items —
+// alternating left/right per step, echoing roadmap.sh's diagram shape in our own theme.
+// All content comes straight from the steps prop (data/roadmaps.js) — nothing added.
+function BranchCard({ step, align }){
+  if (!step.topics?.length) return null;
   return (
-    <div className="journey-track">
-      {steps.map((step, i) => (
-        <div className="journey-step" key={step.title}>
-          <div className="journey-node-col">
-            <div className="journey-node">{i + 1}</div>
-            {i < steps.length - 1 && (
-              <motion.div
-                className="journey-connector"
-                initial={{ scaleY: 0 }}
-                whileInView={{ scaleY: 1 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }}
-              />
-            )}
+    <motion.div
+      className="flow-branch"
+      initial={{ opacity: 0, x: align === "left" ? 16 : -16 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
+      {step.topics.map(group => (
+        <div className="flow-branch-card" key={group.subject}>
+          <span className="flow-branch-label">{group.subject}</span>
+          <div className="flow-branch-items">
+            {group.items.map(item => (
+              <span className="flow-branch-item" key={item}>{item}</span>
+            ))}
           </div>
-          <motion.div
-            className="journey-row"
-            initial={{ opacity: 0, x: -16 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <h3 className="journey-title">{step.title}</h3>
-            {step.topics?.length > 0 && (
-              <div className="journey-subject-cards">
-                {step.topics.map(group => (
-                  <div className="journey-subject-card" key={group.subject}>
-                    <span className="journey-subject-label">{group.subject}</span>
-                    <div className="journey-subject-scroll">
-                      {group.items.map(item => (
-                        <span className="journey-subject-pill" key={item}>{item}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
         </div>
       ))}
+    </motion.div>
+  );
+}
+
+export default function JourneyRoadmap({ steps }){
+  return (
+    <div className="flow-track">
+      {steps.map((step, i) => {
+        const branchOnRight = i % 2 === 0;
+        return (
+          <div className="flow-row" id={slugify(step.title)} style={{scrollMarginTop:96}} key={step.title}>
+            <div className="flow-slot flow-slot-left">
+              {!branchOnRight && (
+                <>
+                  <BranchCard step={step} align="left" />
+                  <span className="flow-connector" aria-hidden="true" />
+                </>
+              )}
+            </div>
+
+            <div className="flow-slot flow-slot-node">
+              <motion.div
+                className="flow-node"
+                initial={{ opacity: 0, scale: 0.92 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+              >
+                <span className="flow-node-num" aria-hidden="true">{i + 1}</span>
+                <span>
+                  <span className="flow-node-title">{step.title}</span>
+                  {step.description && <span className="flow-node-desc">{step.description}</span>}
+                </span>
+              </motion.div>
+            </div>
+
+            <div className="flow-slot flow-slot-right">
+              {branchOnRight && (
+                <>
+                  <span className="flow-connector" aria-hidden="true" />
+                  <BranchCard step={step} align="right" />
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { faqs } from "../data/faqData";
+import { faqs as siteFaqs } from "../data/faqData";
 
 function FAQItem({ item, index, isOpen, onToggle }){
   const questionId = `faq-question-${index}`;
@@ -58,8 +58,14 @@ function FAQItem({ item, index, isOpen, onToggle }){
   );
 }
 
-export default function FAQSection(){
+export default function FAQSection({ items, title = "Frequently Asked Questions", subtitle }){
   const [openIndex, setOpenIndex] = useState(null);
+  const faqs = items || siteFaqs;
+  const description = subtitle || (
+    "Have questions about finding IT jobs, software developer opportunities or tech internships? Find " +
+    "answers to some of the most common questions about discovering and applying for technology " +
+    "opportunities on jobkhojoAI."
+  );
 
   return (
     <motion.section
@@ -71,12 +77,8 @@ export default function FAQSection(){
       aria-labelledby="faq-heading"
     >
       <div className="section-heading">
-        <h2 id="faq-heading">Frequently Asked Questions</h2>
-        <p>
-          Have questions about finding IT jobs, software developer opportunities or tech internships? Find
-          answers to some of the most common questions about discovering and applying for technology
-          opportunities on jobkhojoAI.
-        </p>
+        <h2 id="faq-heading">{title}</h2>
+        <p>{description}</p>
       </div>
       <div className="faq-list">
         {faqs.map((item, i) => (

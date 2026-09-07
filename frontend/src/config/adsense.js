@@ -6,4 +6,6 @@ export const ADSENSE_CLIENT = "ca-pub-1345881889629105";
 export const AD_SLOTS = {
   jobDetailSidebar: "",      // desktop (>=1180px): sticky top-right sidebar
   jobDetailMobileBanner: "", // below 1180px: responsive in-content banner
+  roadmapDetailSidebar: "",      // desktop (>=1300px): sticky right rail next to the diagram
+  roadmapDetailMobileBanner: "", // below 1300px: responsive in-content banner
 };

@@ -361,59 +361,63 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
 }
 .quick-actions-divider{ height:1px; background: var(--color-border-default); margin: var(--space-4) 0; }
 
-/* ===== Journey roadmap (numbered circles, dashed connector, per-subject cards) ===== */
-.journey-track{ display:flex; flex-direction:column; width:100%; }
-.journey-step{ display:flex; gap: var(--space-8); align-items:stretch; }
-.journey-node-col{ display:flex; flex-direction:column; align-items:center; width:56px; flex-shrink:0; }
-.journey-node{
-  width:52px; height:52px; border-radius:50%; background: var(--color-surface-raised);
-  border:1px solid var(--color-border-muted); color: var(--color-text-primary); font-weight:700; font-size:18px;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+/* ===== Journey roadmap: flowchart diagram (center spine + alternating branch cards) ===== */
+.flow-track{ display:flex; flex-direction:column; width:100%; }
+.flow-row{
+  position:relative; display:grid; grid-template-columns: 1fr 260px 1fr;
+  column-gap: var(--space-8); align-items:center; padding: var(--space-8) 0;
 }
-.journey-connector{
-  flex:1; width:0; border-left:2px dashed var(--color-border-muted); margin:8px 0; transform-origin:top;
+.flow-row::before{
+  content:""; position:absolute; top:0; bottom:0; left:50%; width:2px;
+  background: var(--color-border-muted); transform: translateX(-1px); z-index:0;
 }
-.journey-row{
-  flex:1; min-width:0; display:flex; align-items:flex-start; flex-wrap:wrap; gap: var(--space-7);
-  padding: var(--space-6) 0 var(--space-10);
+.flow-row:first-child::before{ top:50%; }
+.flow-row:last-child::before{ bottom:50%; }
+
+.flow-slot{ min-width:0; }
+.flow-slot:empty{ display:none; }
+.flow-slot-left{ display:flex; align-items:center; justify-content:flex-end; gap: var(--space-5); }
+.flow-slot-right{ display:flex; align-items:center; justify-content:flex-start; gap: var(--space-5); }
+.flow-connector{ width:28px; height:0; border-top:2px dashed var(--color-border-muted); flex-shrink:0; }
+
+.flow-node{
+  position:relative; z-index:1; display:flex; align-items:flex-start; gap: var(--space-5);
+  background: var(--color-brand); color:#04140f; border-radius: var(--radius-xs);
+  padding: var(--space-6) var(--space-7); box-shadow: var(--shadow-card);
 }
-.journey-title{ margin:0; font-size:16px; flex-shrink:0; width:220px; padding-top: var(--space-6); }
-.journey-subject-cards{ flex:1; min-width:0; display:flex; flex-wrap:wrap; gap: var(--space-5); }
-.journey-subject-card{
-  flex:1 1 220px; max-width:300px; min-width:0; background: var(--color-surface-raised);
-  border:1px solid var(--color-border-default); border-radius: var(--radius-sm); padding: var(--space-6);
+.flow-node-num{
+  flex-shrink:0; width:22px; height:22px; border-radius:50%; background:rgba(4,20,15,.16);
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800;
 }
-.journey-subject-label{
+.flow-node-title{ display:block; font-size:15px; font-weight:800; line-height:1.3; }
+.flow-node-desc{ display:block; margin-top:4px; font-size:12px; color:#0a2a20; opacity:.85; line-height:1.5; }
+
+.flow-branch{ display:flex; flex-direction:column; gap: var(--space-4); max-width:320px; min-width:0; }
+.flow-branch-card{
+  background: var(--color-surface-raised); border:1px solid var(--color-border-default);
+  border-radius: var(--radius-xs); padding: var(--space-5) var(--space-6);
+}
+.flow-branch-label{
   display:block; font-size:11px; font-weight:800; letter-spacing:.6px; text-transform:uppercase;
-  color: var(--color-brand-strong); margin-bottom: var(--space-5);
+  color: var(--color-brand-strong); margin-bottom: var(--space-4);
 }
-.journey-subject-scroll{
-  display:flex; gap: var(--space-4); overflow-x:auto; padding-bottom: var(--space-4);
-  scrollbar-width:thin; scrollbar-color: var(--color-border-muted) transparent;
-}
-.journey-subject-scroll::-webkit-scrollbar{ height:5px; }
-.journey-subject-scroll::-webkit-scrollbar-track{ background:transparent; }
-.journey-subject-scroll::-webkit-scrollbar-thumb{ background: var(--color-border-muted); border-radius: var(--radius-pill); }
-.journey-subject-scroll::-webkit-scrollbar-thumb:hover{ background: var(--color-text-tertiary); }
-.journey-subject-pill{
-  flex-shrink:0; padding: var(--space-3) var(--space-5); border:1px solid var(--color-border-default);
-  border-radius: var(--radius-pill); background: var(--color-surface-base); font-size:12.5px;
-  color: var(--color-text-secondary); white-space:nowrap;
+.flow-branch-items{ display:flex; flex-wrap:wrap; gap: var(--space-3); }
+.flow-branch-item{
+  padding: 4px 10px; border:1px solid var(--color-border-default); border-radius: var(--radius-pill);
+  background: var(--color-surface-base); font-size:11.5px; color: var(--color-text-secondary);
 }
 
-@media (max-width: 760px){
-  .journey-row{ flex-direction:column; align-items:stretch; gap: var(--space-5); }
-  .journey-title{ width:auto; padding-top:0; }
-  .journey-subject-cards{ width:100%; }
-  .journey-subject-card{ max-width:none; width:100%; flex:1 1 100%; }
+@media (max-width: 860px){
+  .flow-row{ grid-template-columns: 1fr; row-gap: var(--space-5); padding: var(--space-6) 0; }
+  .flow-row::before{ display:none; }
+  .flow-slot-node{ order:1; }
+  .flow-slot-left, .flow-slot-right{ order:2; justify-content:flex-start; }
+  .flow-connector{ display:none; }
+  .flow-branch{ max-width:none; width:100%; }
 }
-
 @media (max-width: 480px){
-  .journey-step{ gap: var(--space-6); }
-  .journey-node-col{ width:44px; }
-  .journey-node{ width:40px; height:40px; font-size:15px; }
-  .journey-title{ font-size:15px; }
-  .journey-subject-card{ padding: var(--space-5); }
+  .flow-node{ padding: var(--space-5) var(--space-6); }
+  .flow-node-title{ font-size:14px; }
 }
 
 /* ===== Scrolling company marquee ===== */
@@ -566,6 +570,53 @@ label{ font-size: var(--font-size-sm); color: var(--color-text-secondary); font-
 }
 @media (max-width: 640px){
   .tag-columns{ grid-template-columns: 1fr; gap: var(--space-8); }
+}
+
+/* Roadmaps & Project Ideas — stacked full-width blocks, each a centered pill-badge
+   label above a 3-column grid of card-buttons. */
+.roadmap-grid-block{ margin-bottom: var(--space-10); }
+.roadmap-grid-block:last-child{ margin-bottom: 0; }
+.roadmap-grid-badge-row{ display:flex; justify-content:center; }
+.roadmap-grid-badge{
+  padding: 6px 18px; border-radius: var(--radius-pill); border:1px solid var(--color-border-default);
+  background: var(--color-surface-raised); font-size: 12px; font-weight:600;
+  text-transform: uppercase; letter-spacing: .6px; color: var(--color-text-tertiary);
+}
+.roadmap-grid-subtitle{
+  text-align:center; margin: 10px 0 20px; font-size: 13px; color: var(--color-text-tertiary);
+}
+.roadmap-card-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+.roadmap-card{
+  display:flex; align-items:center; justify-content:space-between; gap: var(--space-4);
+  padding: 14px 18px; border-radius: var(--radius-xs); border:1px solid var(--color-border-default);
+  background: var(--color-surface-raised); color: var(--color-text-secondary);
+  font-size: var(--font-size-sm); font-weight:600;
+}
+.roadmap-card svg{ opacity:.5; flex-shrink:0; }
+@media (max-width: 900px){
+  .roadmap-card-grid{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px){
+  .roadmap-card-grid{ grid-template-columns: 1fr; }
+}
+
+/* ===== Roadmap detail — enhanced layout (related roadmaps row, ad rail, project tiers) ===== */
+.roadmap-related-row{ display:flex; flex-wrap:wrap; align-items:center; gap: var(--space-4); }
+.roadmap-related-label{
+  font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.5px;
+  color: var(--color-text-tertiary); margin-right: var(--space-3);
+}
+.roadmap-main-grid{ display:block; }
+.roadmap-ad-rail{ display:none; }
+.roadmap-mobile-ad{ margin: 32px 0; }
+@media (min-width: 1300px){
+  .roadmap-main-grid{ display:grid; grid-template-columns: 1fr 300px; gap: var(--space-8); align-items:start; }
+  .roadmap-ad-rail{ display:block; position:sticky; top:96px; }
+  .roadmap-mobile-ad{ display:none; }
+}
+.roadmap-tier-card{
+  background: var(--color-surface-raised); border:1px solid var(--color-border-default);
+  border-radius: var(--radius-xs); padding: var(--space-6);
 }
 
 /* ===== Career guide pages (Interview Tips, Resume Builder) ===== */

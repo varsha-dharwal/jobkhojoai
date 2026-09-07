@@ -17,6 +17,18 @@ export const ROADMAPS = {
   frontend: {
     title: "Frontend Developer",
     tagline: "A complete, in-depth path from your first `<div>` to a job-ready, AI-fluent frontend engineer.",
+    // Pilot-only field: skill-roadmap slugs to cross-link. Presence of this field is what
+    // switches RoadmapDetail into the enhanced (related roadmaps + ad rail) layout.
+    relatedRoadmaps: ["javascript", "react", "typescript", "nodejs"],
+    faqs: [
+      { question: "Is Frontend Development a good career?", answer: "Yes — it's one of the most consistently in-demand tech roles, since every product with a web or app interface needs one. It's also remote-friendly, and the core skills (JavaScript, a framework, APIs) transfer across industries.", links: [{ label: "Browse frontend jobs", to: "/?search=frontend#jobs" }] },
+      { question: "How to prepare for a frontend developer interview?", answer: "Be solid on JavaScript fundamentals, comfortable in at least one framework (React shows up in the most job postings), able to talk through 2-3 real projects you built, and ready for basic DSA/coding-round questions.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Frontend Developer?", answer: "Common titles include Frontend Developer, Frontend Engineer, UI Developer, React Developer, and Web Developer — and Full Stack Developer once you also pick up backend skills." },
+      { question: "How to become a Frontend Developer?", answer: "Learn HTML, CSS and JavaScript first, then pick one framework (React is the safest default), build several real projects instead of just tutorials, put them on GitHub, and start applying — this roadmap follows that exact order." },
+      { question: "How long does it take to become a Frontend Developer?", answer: "With consistent daily practice, most people reach a job-ready level in 4-8 months — faster with a programming background, slower if learning alongside a full-time job." },
+      { question: "What are Frontend Developer salaries?", answer: "Salaries vary a lot by experience, company size, and location/remote status, so treat any single number as a rough guide.", links: [{ label: "See live frontend job listings", to: "/?search=frontend#jobs" }] },
+      { question: "What skills does a Frontend Developer need?", answer: "HTML, CSS, JavaScript, one framework (React/Vue/Angular), Git, REST API integration, and basic testing — this roadmap covers all of it in order." },
+    ],
     steps: [
       { title: "HTML Fundamentals", description: "The markup every page is built on.", topics: [
         { subject: "HTML", items: ["HTML5 Basics", "Semantic HTML", "Forms & Validation", "Tables", "Meta Tags", "SEO Basics", "Accessibility (ARIA)", "Multimedia", "SVG", "Best Practices", "HTML Entities", "Iframes", "Lists", "Attributes", "Head vs Body", "Block vs Inline Elements", "Canvas Basics", "Web Storage", "HTML Templates", "HTML Project Structure"] },
@@ -83,6 +95,15 @@ export const ROADMAPS = {
   backend: {
     title: "Backend Developer",
     tagline: "A complete, in-depth path from language fundamentals to a job-ready, AI-fluent backend engineer.",
+    faqs: [
+      { question: "Is Backend Development a good career?", answer: "Yes — backend engineers own the infrastructure every product depends on, so demand is steady across almost every industry, and it's a strong base for later moving into system design or architecture roles.", links: [{ label: "Browse backend jobs", to: "/?search=backend#jobs" }] },
+      { question: "How to prepare for a backend developer interview?", answer: "Know database design and SQL, be able to design a REST API from scratch, understand authentication basics, and expect at least one system-design-style question at mid/senior level.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Backend Developer?", answer: "Common titles include Backend Developer, Backend Engineer, API Developer, Server-side Engineer, and Full Stack Developer once frontend skills are added." },
+      { question: "How to become a Backend Developer?", answer: "Pick one language (Node.js, Python, or Java are the most common), learn databases and API design, add authentication and basic DevOps, then build and deploy a real project end to end." },
+      { question: "How long does it take to become a Backend Developer?", answer: "Typically 5-9 months of consistent practice — faster if you already know a programming language, slower if you're starting from zero." },
+      { question: "What are Backend Developer salaries?", answer: "Salaries vary by language/stack, seniority, and company, so treat any single figure as a rough guide rather than a fact.", links: [{ label: "See live backend job listings", to: "/?search=backend#jobs" }] },
+      { question: "What skills does a Backend Developer need?", answer: "One backend language, SQL/NoSQL databases, REST API design, authentication, basic caching, and enough DevOps to actually deploy what you build." },
+    ],
     steps: [
       { title: "Programming Language Fundamentals", description: "The language basics every backend role is built on.", topics: [
         { subject: "Languages", items: ["JavaScript (Node.js)", "Python", "Java", "C#", "Go", "PHP", "Variables", "Data Types", "Functions", "Loops", "OOP Basics", "Error Handling", "Modules", "Packages", "File Handling", "Memory Basics", "Collections", "Exceptions", "Coding Standards", "Best Practices"] },
@@ -149,6 +170,15 @@ export const ROADMAPS = {
   "full-stack": {
     title: "Full Stack Developer",
     tagline: "A complete, in-depth path from programming fundamentals to an MNC-ready full stack engineer.",
+    faqs: [
+      { question: "Is Full Stack Development a good career?", answer: "Yes — it's one of the most versatile and highest-demand roles since it covers both ends of a product, which makes full stack developers especially valuable at startups and mid-size companies.", links: [{ label: "Browse full stack jobs", to: "/?search=full stack#jobs" }] },
+      { question: "How to prepare for a full stack developer interview?", answer: "Be comfortable walking through a request end-to-end — database, API, and UI — and have at least one real project you built solo across the whole stack, not just a tutorial clone.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Full Stack Developer?", answer: "Common titles include Full Stack Developer, Full Stack Engineer, MERN/MEAN Stack Developer, and simply Software Engineer at many companies." },
+      { question: "How to become a Full Stack Developer?", answer: "Learn frontend (HTML/CSS/JS + a framework) and backend (a language + database + APIs) in parallel, then build 2-3 complete projects end to end and deploy them yourself." },
+      { question: "How long does it take to become a Full Stack Developer?", answer: "Typically 6-10 months, since you're covering roughly double the ground of a pure frontend or backend role — faster with prior experience in either half." },
+      { question: "What are Full Stack Developer salaries?", answer: "Full stack roles often pay a bit more than pure frontend or backend at similar experience levels, but it still varies a lot by company and location.", links: [{ label: "See live full stack job listings", to: "/?search=full stack#jobs" }] },
+      { question: "What skills does a Full Stack Developer need?", answer: "HTML/CSS/JS, a frontend framework, a backend language with a database, REST APIs, Git, and enough deployment knowledge to ship a project yourself." },
+    ],
     steps: [
       { title: "Programming Fundamentals", description: "The logic and problem-solving skills every language builds on.", topics: [
         { subject: "Programming Basics", items: ["Computer Fundamentals", "Problem Solving", "Variables & Data Types", "Operators", "Control Flow", "Functions", "Arrays", "Objects", "OOP Basics", "Error Handling", "Modules", "File Handling", "Algorithms Basics", "Data Structures Basics", "Debugging", "Coding Standards", "Best Practices", "IDE Setup", "Command Line Basics", "Programming Logic"] },
@@ -215,6 +245,15 @@ export const ROADMAPS = {
   ai: {
     title: "AI Engineer",
     tagline: "A complete, in-depth path from CS fundamentals to a job-ready AI engineer at top companies.",
+    faqs: [
+      { question: "Is AI Engineering a good career?", answer: "Yes — it's currently one of the fastest-growing tech roles, driven by the LLM and AI-agent boom, and demand is outpacing the supply of people who can actually build with these tools.", links: [{ label: "Browse AI jobs", to: "/?search=AI#jobs" }] },
+      { question: "How to prepare for an AI Engineer interview?", answer: "Be solid in Python and ML fundamentals, and have at least one real project that uses an LLM API, RAG, or an agent framework — not just a course certificate.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of an AI Engineer?", answer: "Common titles include AI Engineer, Applied AI Engineer, GenAI Engineer, and ML Engineer — these overlap heavily in practice." },
+      { question: "How to become an AI Engineer?", answer: "Learn Python, ML fundamentals and deep learning basics, then go deep on LLM/GenAI tooling (prompting, RAG, agents) and ship at least one real AI project end to end." },
+      { question: "How long does it take to become an AI Engineer?", answer: "Typically 6-12 months, depending heavily on your existing math and programming background." },
+      { question: "What are AI Engineer salaries?", answer: "AI roles are currently among the highest-paying in tech, though it varies a lot by company and specialization.", links: [{ label: "See live AI job listings", to: "/?search=AI#jobs" }] },
+      { question: "AI Engineer vs ML Engineer — what's the difference?", answer: "AI Engineers typically focus on building products on top of existing models (APIs, RAG, agents); ML Engineers focus more on training and deploying custom models. In practice, the two roles overlap significantly." },
+    ],
     steps: [
       { title: "Computer Science Fundamentals", description: "The foundation every engineering discipline is built on.", topics: [
         { subject: "CS Basics", items: ["Computer Fundamentals", "Operating Systems", "Networking Basics", "Data Structures", "Algorithms", "Object-Oriented Programming", "Problem Solving", "Time Complexity", "Space Complexity", "Design Patterns", "Git Basics", "Linux Basics", "Command Line", "Debugging", "Software Engineering Principles", "Clean Code", "Version Control", "SDLC", "Agile Basics", "Best Practices"] },
@@ -281,6 +320,15 @@ export const ROADMAPS = {
   ml: {
     title: "Machine Learning Engineer",
     tagline: "A complete, in-depth path from CS fundamentals to an ML engineer at top companies.",
+    faqs: [
+      { question: "Is Machine Learning Engineering a good career?", answer: "Yes — it's in strong, steady demand and sits at the intersection of data science and software engineering, which makes it valuable at both product companies and research-heavy teams.", links: [{ label: "Browse ML jobs", to: "/?search=machine learning#jobs" }] },
+      { question: "How to prepare for an ML Engineer interview?", answer: "Be solid on statistics and core ML algorithms, and have one end-to-end project (data → model → deployment) you can walk through in detail, plus a standard coding round.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Machine Learning Engineer?", answer: "Common titles include ML Engineer, Applied Scientist, MLOps Engineer, and AI Engineer — these overlap heavily." },
+      { question: "How to become a Machine Learning Engineer?", answer: "Learn Python, statistics and math fundamentals, then classic ML followed by deep learning, and deploy at least one trained model as a real, callable API." },
+      { question: "How long does it take to become a Machine Learning Engineer?", answer: "Typically 6-12 months, depending on your math background and how much hands-on project work you do along the way." },
+      { question: "What are Machine Learning Engineer salaries?", answer: "Generally strong given the specialized skillset required, but it varies a lot by company, seniority, and domain.", links: [{ label: "See live ML job listings", to: "/?search=machine learning#jobs" }] },
+      { question: "ML Engineer vs Data Scientist — what's the difference?", answer: "Data Scientists focus more on analysis, experimentation, and generating insights; ML Engineers focus more on building and shipping production ML systems that others can rely on." },
+    ],
     steps: [
       { title: "Computer Science Fundamentals", description: "The foundation every engineering discipline is built on.", topics: [
         { subject: "CS Basics", items: ["Computer Fundamentals", "Operating Systems", "Networking Basics", "Data Structures", "Algorithms", "Object-Oriented Programming", "Problem Solving", "Time & Space Complexity", "Linux Basics", "Git Basics", "Debugging", "Software Engineering", "SDLC", "Design Patterns", "Command Line", "Coding Standards", "Version Control", "Agile Basics", "System Thinking", "Best Practices"] },
@@ -347,6 +395,15 @@ export const ROADMAPS = {
   "data-science": {
     title: "Data Scientist",
     tagline: "A complete, in-depth path from CS fundamentals to a data scientist at top companies.",
+    faqs: [
+      { question: "Is Data Science a good career?", answer: "Yes — it's in demand across nearly every industry that collects data, and it's a good hybrid role for people who like both analysis and communicating findings to non-technical stakeholders.", links: [{ label: "Browse data science jobs", to: "/?search=data science#jobs" }] },
+      { question: "How to prepare for a Data Scientist interview?", answer: "Be strong in statistics/probability and SQL, have a portfolio of real analysis projects (not just Kaggle notebooks), and expect case-study-style business questions.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Data Scientist?", answer: "Common titles include Data Scientist, Data Analyst (typically junior/entry), and Applied Scientist at larger companies." },
+      { question: "How to become a Data Scientist?", answer: "Learn statistics and SQL first, then Python (pandas/numpy), followed by ML fundamentals — and build real analysis projects using public datasets you can talk through in interviews." },
+      { question: "How long does it take to become a Data Scientist?", answer: "Typically 6-10 months of consistent practice, depending on your math/stats background going in." },
+      { question: "What are Data Scientist salaries?", answer: "Salaries vary a lot by seniority, domain (finance and product companies often pay more), and location.", links: [{ label: "See live data science job listings", to: "/?search=data science#jobs" }] },
+      { question: "What skills does a Data Scientist need?", answer: "SQL, Python or R, statistics, data visualization, ML fundamentals, and the ability to explain findings clearly to people who aren't technical." },
+    ],
     steps: [
       { title: "Computer Science Fundamentals", description: "The foundation every engineering discipline is built on.", topics: [
         { subject: "CS Basics", items: ["Computer Fundamentals", "Operating Systems", "Networking Basics", "Data Structures", "Algorithms", "Object-Oriented Programming", "Problem Solving", "Time Complexity", "Space Complexity", "Git Basics", "Linux Basics", "Command Line", "Software Engineering", "SDLC", "Debugging", "Clean Code", "Version Control", "Agile Basics", "Programming Logic", "Best Practices"] },
@@ -413,6 +470,15 @@ export const ROADMAPS = {
   devops: {
     title: "DevOps Engineer",
     tagline: "A complete, in-depth path from Linux fundamentals to a DevOps engineer at top companies.",
+    faqs: [
+      { question: "Is DevOps a good career?", answer: "Yes — it's a critical infrastructure role in high demand and generally well-paid, though it often comes with on-call/incident-response responsibilities that pure development roles don't have.", links: [{ label: "Browse DevOps jobs", to: "/?search=devops#jobs" }] },
+      { question: "How to prepare for a DevOps Engineer interview?", answer: "Know Linux fundamentals, CI/CD concepts, one cloud provider, and Docker/Kubernetes basics — expect scenario-based troubleshooting questions rather than pure theory.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a DevOps Engineer?", answer: "Common titles include DevOps Engineer, Site Reliability Engineer (SRE), Platform Engineer, and Cloud Engineer — these overlap significantly." },
+      { question: "How to become a DevOps Engineer?", answer: "Learn Linux, then Docker, CI/CD pipelines, one cloud provider, and Kubernetes — and build a real deployment pipeline project you can walk through end to end." },
+      { question: "How long does it take to become a DevOps Engineer?", answer: "Typically 6-10 months, faster if you already have backend or sysadmin experience." },
+      { question: "What are DevOps Engineer salaries?", answer: "Generally strong given how critical the role is to keeping systems running, but it varies by cloud provider expertise and company size.", links: [{ label: "See live DevOps job listings", to: "/?search=devops#jobs" }] },
+      { question: "DevOps vs SRE — what's the difference?", answer: "DevOps typically focuses on build/release pipelines and automation; SRE focuses more on reliability, monitoring, and incident response. Many companies use the titles interchangeably." },
+    ],
     steps: [
       { title: "Computer Science & Linux Fundamentals", description: "The OS and shell almost everything you'll run sits on top of.", topics: [
         { subject: "CS & Linux", items: ["Computer Fundamentals", "Operating Systems", "Linux Installation", "Linux File System", "Terminal Commands", "File Permissions", "Process Management", "Users & Groups", "Shell Scripting", "Networking Basics", "SSH", "Cron Jobs", "Package Managers", "System Monitoring", "Logs", "Environment Variables", "Bash Scripting", "Debugging", "Security Basics", "Best Practices"] },
@@ -479,6 +545,15 @@ export const ROADMAPS = {
   cloud: {
     title: "Cloud Engineer",
     tagline: "A complete, in-depth path from Linux fundamentals to a cloud engineer at top companies.",
+    faqs: [
+      { question: "Is Cloud Engineering a good career?", answer: "Yes — most companies now run cloud-first infrastructure, so demand for people who can design and manage it stays strong across almost every industry.", links: [{ label: "Browse cloud jobs", to: "/?search=cloud#jobs" }] },
+      { question: "How to prepare for a Cloud Engineer interview?", answer: "Go deep on one provider first (know core compute/storage/networking/IAM services), then be ready for scenario questions like designing a highly-available setup.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Cloud Engineer?", answer: "Common titles include Cloud Engineer, Cloud Architect (senior), Cloud Support Engineer, and Cloud DevOps Engineer." },
+      { question: "How to become a Cloud Engineer?", answer: "Learn Linux and networking basics, then go deep on one cloud provider, add infrastructure-as-code (Terraform), and pursue a certification if you can — it meaningfully helps with entry-level roles." },
+      { question: "How long does it take to become a Cloud Engineer?", answer: "Typically 5-9 months, faster with prior Linux/networking or backend experience." },
+      { question: "What are Cloud Engineer salaries?", answer: "Varies by provider expertise and certifications held — certified engineers often command noticeably higher offers.", links: [{ label: "See live cloud job listings", to: "/?search=cloud#jobs" }] },
+      { question: "Which cloud provider should I learn first?", answer: "AWS shows up in the most job postings overall; Azure is very common in enterprise and India-based MNC environments. Pick based on what you see most in job listings near you." },
+    ],
     steps: [
       { title: "Computer Science & Linux Fundamentals", description: "The OS and shell almost everything you'll run sits on top of.", topics: [
         { subject: "CS & Linux", items: ["Computer Fundamentals", "Operating Systems", "Linux Installation", "Linux Commands", "File System", "Process Management", "Users & Groups", "Permissions", "Shell Scripting", "Environment Variables", "SSH", "Networking Basics", "System Monitoring", "Logs", "Package Managers", "Bash Scripting", "Cron Jobs", "Debugging", "Security Basics", "Best Practices"] },
@@ -545,6 +620,15 @@ export const ROADMAPS = {
   "ui-ux": {
     title: "UI/UX Designer",
     tagline: "A complete, in-depth path from design fundamentals to a UI/UX designer at top companies.",
+    faqs: [
+      { question: "Is UI/UX Design a good career?", answer: "Yes — as products increasingly compete on experience, demand for designers who understand both usability and visual craft has stayed strong, and it doesn't require you to write code.", links: [{ label: "Browse UI/UX jobs", to: "/?search=UI/UX#jobs" }] },
+      { question: "How to prepare for a UI/UX Designer interview?", answer: "Build a strong portfolio with real case studies — not just polished screens — and be ready to walk through your process and the reasoning behind specific design decisions.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a UI/UX Designer?", answer: "Common titles include UI/UX Designer, Product Designer, UX Researcher, and Interaction Designer." },
+      { question: "How to become a UI/UX Designer?", answer: "Learn design fundamentals, then Figma, then user research basics — and build a portfolio of 3-4 real case studies rather than one big project." },
+      { question: "How long does it take to become a UI/UX Designer?", answer: "Typically 4-8 months to reach a job-ready portfolio, depending on how much feedback and iteration you get along the way." },
+      { question: "What are UI/UX Designer salaries?", answer: "Product companies generally pay more than agencies for the same experience level, and it varies further by seniority and location.", links: [{ label: "See live UI/UX job listings", to: "/?search=UI/UX#jobs" }] },
+      { question: "What skills does a UI/UX Designer need?", answer: "Figma, user research, wireframing/prototyping, core usability principles, and the ability to clearly present and defend design decisions." },
+    ],
     steps: [
       { title: "Design Fundamentals", description: "The visual and conceptual basics every design decision builds on.", topics: [
         { subject: "Design Basics", items: ["What is UI Design?", "What is UX Design?", "Design Principles", "Color Theory", "Typography", "Layout & Composition", "Visual Hierarchy", "White Space", "Alignment", "Contrast", "Balance", "Proximity", "Gestalt Principles", "Branding Basics", "Accessibility", "Responsive Design", "Design Psychology", "Design Thinking", "Problem Solving", "Best Practices"] },
@@ -611,6 +695,15 @@ export const ROADMAPS = {
   qa: {
     title: "QA Engineer",
     tagline: "A complete, in-depth path from testing fundamentals to a QA engineer at top companies.",
+    faqs: [
+      { question: "Is QA Engineering a good career?", answer: "Yes — it's a steady-demand role and a good entry point into tech, with a clear path into higher-paying automation/SDET roles as you add coding skills.", links: [{ label: "Browse QA jobs", to: "/?search=QA#jobs" }] },
+      { question: "How to prepare for a QA Engineer interview?", answer: "Know manual testing fundamentals plus at least one automation tool (Selenium, Playwright, or Cypress), and be ready for bug-reporting and test-case-design scenario questions.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a QA Engineer?", answer: "Common titles include QA Engineer, Test Engineer, SDET (Software Development Engineer in Test), and QA Automation Engineer." },
+      { question: "How to become a QA Engineer?", answer: "Start with manual testing fundamentals, then learn one automation framework, add API testing, and build a small automated test suite you can show in interviews." },
+      { question: "How long does it take to become a QA Engineer?", answer: "Roughly 3-6 months for manual testing skills, 6-9 months to also be automation-capable." },
+      { question: "What are QA Engineer salaries?", answer: "Automation QA typically pays more than manual-only testing, and it varies further by company and seniority.", links: [{ label: "See live QA job listings", to: "/?search=QA#jobs" }] },
+      { question: "Manual vs Automation QA — which should I learn?", answer: "Start with manual testing to understand the fundamentals, then move into automation — it pays better and is in higher demand. This roadmap covers both in order." },
+    ],
     steps: [
       { title: "Software Testing Fundamentals", description: "Where bugs actually come from, and how testing catches them.", topics: [
         { subject: "Testing Basics", items: ["What is Software Testing?", "SDLC", "STLC", "Testing Life Cycle", "Bug Life Cycle", "Testing Levels", "Testing Types", "Verification", "Validation", "Test Strategy", "Test Plan", "Test Cases", "Test Scenarios", "Defect Reporting", "Root Cause Analysis", "Quality Assurance", "Quality Control", "Risk Analysis", "Documentation", "Best Practices"] },
@@ -677,6 +770,15 @@ export const ROADMAPS = {
   "cyber-security": {
     title: "Cyber Security Engineer",
     tagline: "A complete, in-depth path from networking fundamentals to a cybersecurity engineer at top companies.",
+    faqs: [
+      { question: "Is Cyber Security a good career?", answer: "Yes — it's one of the highest-demand tech fields globally, with a chronic shortage of skilled people, and pay grows steeply with hands-on experience.", links: [{ label: "Browse cyber security jobs", to: "/?search=cyber security#jobs" }] },
+      { question: "How to prepare for a Cyber Security interview?", answer: "Know networking fundamentals and common attack types cold, do hands-on labs or CTFs to back it up, and be ready to explain how you'd respond to a specific incident scenario.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Cyber Security Engineer?", answer: "Common titles include Security Analyst, SOC Analyst, Penetration Tester, Security Engineer, and Cybersecurity Engineer." },
+      { question: "How to become a Cyber Security Engineer?", answer: "Learn networking, then security fundamentals, then practice with hands-on labs and CTFs, add a certification (Security+ or CEH), and pick a specialization (offensive or defensive)." },
+      { question: "How long does it take to become a Cyber Security Engineer?", answer: "Typically 6-12 months to reach an entry-level-ready level, faster with a networking or sysadmin background." },
+      { question: "What are Cyber Security salaries?", answer: "Varies a lot by specialization — offensive/red-team roles usually pay more — and by certifications held.", links: [{ label: "See live cyber security job listings", to: "/?search=cyber security#jobs" }] },
+      { question: "Do I need certifications for cybersecurity?", answer: "Not strictly required to start, but certifications like Security+, CEH, or OSCP meaningfully help you get past HR filters, especially if you don't have prior work experience." },
+    ],
     steps: [
       { title: "Computer Science & Networking Fundamentals", description: "You can't secure what you don't understand.", topics: [
         { subject: "CS & Networking", items: ["Computer Fundamentals", "Operating Systems", "Linux Basics", "Windows Basics", "Networking Basics", "OSI Model", "TCP/IP", "DNS", "HTTP & HTTPS", "IP Addressing", "Subnetting", "Routing", "Switching", "VPN", "Firewalls", "SSH", "Command Line", "Virtualization", "Cloud Basics", "Best Practices"] },
@@ -743,6 +845,15 @@ export const ROADMAPS = {
   "mobile-development": {
     title: "Mobile Developer",
     tagline: "A complete, in-depth path from programming fundamentals to a mobile developer at top companies.",
+    faqs: [
+      { question: "Is Mobile Development a good career?", answer: "Yes — steady demand since most products need a mobile presence, and cross-platform tools like React Native and Flutter now let one skillset cover both Android and iOS.", links: [{ label: "Browse mobile developer jobs", to: "/?search=mobile#jobs" }] },
+      { question: "How to prepare for a Mobile Developer interview?", answer: "Be solid in one framework (React Native, Flutter, or native Android/iOS), and have 2-3 real apps you built — ideally with at least one published to a store.", links: [{ label: "Interview prep guide", to: "/career-guide/interview-tips" }] },
+      { question: "What are the job titles of a Mobile Developer?", answer: "Common titles include Mobile Developer, Android Developer, iOS Developer, React Native Developer, and Flutter Developer." },
+      { question: "How to become a Mobile Developer?", answer: "Pick a path — native Android/iOS or cross-platform (React Native/Flutter) — build real apps, publish at least one to a store, and start applying." },
+      { question: "How long does it take to become a Mobile Developer?", answer: "Typically 5-9 months, faster if you already know JavaScript (for React Native) or another OOP language." },
+      { question: "What are Mobile Developer salaries?", answer: "Native iOS development often commands a premium; otherwise it varies by platform, company, and experience.", links: [{ label: "See live mobile developer job listings", to: "/?search=mobile#jobs" }] },
+      { question: "Should I learn native (Android/iOS) or cross-platform (React Native/Flutter)?", answer: "Cross-platform gets you to a working app on both platforms faster and matches more job postings. Native is worth it if you're targeting one platform specifically or need deep platform-level control." },
+    ],
     steps: [
       { title: "Programming Fundamentals", description: "The logic and problem-solving skills every mobile stack builds on.", topics: [
         { subject: "Programming Basics", items: ["Computer Fundamentals", "Problem Solving", "Variables", "Data Types", "Operators", "Control Flow", "Functions", "Arrays", "Objects", "OOP", "Error Handling", "Data Structures", "Algorithms Basics", "File Handling", "Debugging", "IDE Setup", "Command Line", "Git Basics", "Coding Standards", "Best Practices"] },
