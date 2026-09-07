@@ -111,6 +111,7 @@ button, input, select, textarea{ font-family: inherit; }
   margin: 0 auto;
 }
 .job-detail-ad-sidebar{ display: none; }
+.job-detail-mobile-ad{ margin: 24px 0; }
 @media (min-width: 1180px){
   .job-detail-layout{
     max-width: 1200px;
@@ -124,6 +125,8 @@ button, input, select, textarea{ font-family: inherit; }
     position: sticky;
     top: 96px;
   }
+  /* sidebar already covers this traffic on wide screens */
+  .job-detail-mobile-ad{ display: none; }
 }
 
 /* buttons */

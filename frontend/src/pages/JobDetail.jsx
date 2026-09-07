@@ -196,6 +196,10 @@ export default function JobDetail(){
         </section>
       )}
 
+      <div className="job-detail-mobile-ad">
+        <AdSlot slot={AD_SLOTS.jobDetailMobileBanner} style={{ minHeight: 100 }} />
+      </div>
+
       {job.roleDescription && (
         <section style={{marginBottom:32}}>
           <SectionTitle icon={icons.role}>Role Description</SectionTitle>
