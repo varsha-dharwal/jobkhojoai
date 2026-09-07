@@ -6,6 +6,8 @@ import { timeAgo } from "../utils/timeAgo";
 import { isJobSaved, toggleSavedJob } from "../utils/savedJobs";
 import SEO from "../components/SEO";
 import { getJobCountry } from "../utils/jobCountry";
+import AdSlot from "../components/AdSlot";
+import { AD_SLOTS } from "../config/adsense";
 
 function BookmarkIcon({ filled }){
   return (
@@ -147,13 +149,15 @@ export default function JobDetail(){
   };
 
   return (
-    <main className="container" style={{paddingTop:32, paddingBottom:60, maxWidth:720}}>
+    <main className="container" style={{paddingTop:32, paddingBottom:60}}>
       <SEO
         title={`${job.title} — ${job.organization} | jobkhojoAI`}
         description={(job.roleDescription || `${job.title} at ${job.organization}. ${job.location} · ${job.category}.`).slice(0, 160)}
         path={`/jobs/${job.slug}`}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobSchema) }} />
+      <div className="job-detail-layout">
+      <div>
       <div className="card" style={{padding:24, marginBottom:24, display:"flex", gap:16}}>
         <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={56} />
         <div style={{flex:1, minWidth:0}}>
@@ -241,6 +245,12 @@ export default function JobDetail(){
       <p style={{fontSize:12, color:"var(--color-text-tertiary)", marginTop:10, textAlign:"center"}}>
         You will be redirected to the official recruiter's website. jobkhojoAI does not collect applications.
       </p>
+      </div>
+
+      <aside className="job-detail-ad-sidebar">
+        <AdSlot slot={AD_SLOTS.jobDetailSidebar} style={{ width: 300, minHeight: 250 }} />
+      </aside>
+      </div>
     </main>
   );
 }
