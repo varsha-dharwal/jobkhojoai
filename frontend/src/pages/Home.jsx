@@ -41,8 +41,7 @@ function RoadmapGridBlock({ badge, subtitle, items, hrefFor }){
             to={hrefFor(item)}
             className="roadmap-card"
             initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: i * 0.03, ease: "easeOut" }}
             whileHover={{ borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
           >
