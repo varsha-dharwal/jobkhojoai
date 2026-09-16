@@ -197,7 +197,7 @@ export default function Home(){
             Fresh IT & software job updates, internships, and remote-friendly roles for freshers and
             experienced tech talent — all in one place.
           </p>
-          <a href="#jobs" className="btn btn-primary">Browse Jobs</a>
+          <a href="#jobs" className="btn btn-primary">Browse Jobs here</a>
         </div>
       </motion.section>
 
