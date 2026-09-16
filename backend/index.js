@@ -30,18 +30,30 @@ app.use((req, res, next) => {
   next();
 });
 
-const allowedOrigins = (process.env.CLIENT_URL || "*")
-  .split(",")
-  .map((origin) => origin.trim());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "https://jobkhojoai.com",
+  "https://www.jobkhojoai.com",
+  "https://jobkhojoai.pages.dev",
+  "https://www.jobkhojoai.pages.dev",
+  ...(process.env.CLIENT_URL || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+];
 
 app.use(
   cors({
-    origin: allowedOrigins.includes("*")
-      ? "*"
-      : (origin, callback) => {
-          if (!origin || allowedOrigins.includes(origin)) callback(null, true);
-          else callback(new Error("Not allowed by CORS"));
-        },
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || /jobkhojoai\.(com|pages\.dev)$/.test(origin) || /localhost:\d+$/.test(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
   })
 );
 app.use(express.json());
