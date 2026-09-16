@@ -162,8 +162,8 @@ export default function Home(){
   return (
     <main className="container">
       <SEO
-        title="jobkhojoAI — Tech Jobs & Internships in India & the USA"
-        description="Daily updated Tech & IT job alerts across India and the USA — software jobs, internships, and remote-friendly roles for freshers and experienced professionals, all in one place."
+        title="Tech Jobs & Internships | jobkhojoAI"
+        description="Find verified tech jobs, internships, and remote-friendly roles in India and the USA. Explore career roadmaps, job alerts, and practical hiring advice on jobkhojoAI."
         path="/"
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />
@@ -183,14 +183,14 @@ export default function Home(){
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
             >
-              Launch Your Tech Career
+              Find Verified Tech Jobs
             </motion.span>
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.35, ease: "easeOut" }}
             >
-              Into The <span className="accent">Future</span>
+              Internships & <span className="accent">Career Guides</span>
             </motion.span>
           </h1>
           <p style={{color:"var(--color-text-secondary)"}}>
@@ -210,8 +210,29 @@ export default function Home(){
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <div className="section-heading">
-          <h2>Roadmaps &amp; Project Ideas</h2>
-          <p>Pick a role, go deep on a skill, or grab a project idea — all mapped to what employers are hiring for right now.</p>
+          <h2>Career Roadmaps, Interview Prep &amp; Hiring Guides</h2>
+          <p>Choose a career path, follow a learning roadmap, and read original articles that help job seekers improve application quality and interview readiness.</p>
+        </div>
+
+        <div className="roadmap-grid-block" style={{ marginBottom: 24 }}>
+          <div className="roadmap-grid-badge-row">
+            <span className="roadmap-grid-badge">Original Articles</span>
+          </div>
+          <p className="roadmap-grid-subtitle" style={{ marginTop: 12, marginBottom: 18 }}>
+            Practical career advice for job seekers, freshers, and hiring-ready professionals.
+          </p>
+          <div className="roadmap-card-grid">
+            {[
+              { slug: "frontend-developer-roadmap-2026", label: "Frontend Developer Roadmap 2026" },
+              { slug: "react-developer-interview-preparation", label: "React Interview Prep" },
+              { slug: "how-to-spot-fake-job-posts", label: "How to Spot Fake Job Posts" },
+            ].map((item, i) => (
+              <Link key={item.slug} to={`/career-guide/${item.slug}`} className="roadmap-card" style={{ opacity: 1, transform: "none" }}>
+                <span>{item.label}</span>
+                <RoadmapCardIcon />
+              </Link>
+            ))}
+          </div>
         </div>
 
         <RoadmapGridBlock

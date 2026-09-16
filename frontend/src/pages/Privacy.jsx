@@ -8,7 +8,7 @@ export default function Privacy(){
         description="Read jobkhojoAI's privacy policy. We don't collect your personal application data — Apply Now links take you directly to the employer's official site."
         path="/privacy-policy"
       />
-      <h1>Privacy Policy</h1>
+      <h1>Privacy Policy for jobkhojoAI</h1>
       <p style={{color:"var(--color-text-secondary)"}}>
         jobkhojoAI does not collect any of your personal application data — the "Apply Now" button takes you
         directly to the hiring company's official website or careers page, where their own privacy policy

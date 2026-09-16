@@ -8,7 +8,7 @@ export default function About(){
         description="Learn about jobkhojoAI — a tech job-alert platform bringing verified IT & software jobs, internships, and remote-friendly roles to job seekers across India and the USA."
         path="/about"
       />
-      <h1>About jobkhojoAI</h1>
+      <h1>About jobkhojoAI: Job Discovery, Career Guidance & Verified Listings</h1>
       <p style={{color:"var(--color-text-secondary)"}}>
         jobkhojoAI is a tech job-alert platform that brings IT & software jobs, internships, and remote-friendly
         roles together in one place, in a simple, easy-to-understand format — with eligibility, salary, important

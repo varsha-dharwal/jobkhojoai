@@ -23,6 +23,16 @@ const staticRoutes = [
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
   { loc: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
   { loc: "/terms", changefreq: "yearly", priority: "0.3" },
+  { loc: "/career-insights", changefreq: "weekly", priority: "0.8" },
+  { loc: "/career-guide/frontend-developer-roadmap-2026", changefreq: "weekly", priority: "0.8" },
+  { loc: "/career-guide/react-developer-interview-preparation", changefreq: "weekly", priority: "0.8" },
+  { loc: "/career-guide/how-to-spot-fake-job-posts", changefreq: "weekly", priority: "0.8" },
+  { loc: "/career-guide/resume-guide-for-it-freshers", changefreq: "weekly", priority: "0.7" },
+  { loc: "/career-guide/how-to-apply-for-remote-tech-jobs", changefreq: "weekly", priority: "0.7" },
+  { loc: "/disclaimer", changefreq: "yearly", priority: "0.3" },
+  { loc: "/editorial-policy", changefreq: "yearly", priority: "0.3" },
+  { loc: "/job-verification-policy", changefreq: "yearly", priority: "0.3" },
+  { loc: "/content-correction-policy", changefreq: "yearly", priority: "0.3" },
 ].map(r => ({ ...r, lastmod: today }));
 
 async function fetchJobUrls() {

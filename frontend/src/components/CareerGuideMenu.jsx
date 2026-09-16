@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 
 export const CAREER_GUIDE_LINKS = [
+  { to: "/career-insights", label: "Career Insights" },
+  { to: "/career-guide/frontend-developer-roadmap-2026", label: "Frontend Developer Roadmap 2026" },
+  { to: "/career-guide/react-developer-interview-preparation", label: "React Developer Interview Preparation" },
+  { to: "/career-guide/how-to-spot-fake-job-posts", label: "How to Spot Fake Job Posts" },
   { to: "/career-guide/interview-tips", label: "Interview Tips" },
   { to: "/career-guide/resume-builder", label: "Resume Builder" },
 ];

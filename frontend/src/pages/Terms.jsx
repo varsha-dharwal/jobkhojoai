@@ -8,7 +8,7 @@ export default function Terms(){
         description="Terms and conditions for using jobkhojoAI, a platform aggregating publicly available tech job and internship listings across India and the USA."
         path="/terms"
       />
-      <h1>Terms &amp; Conditions</h1>
+      <h1>Terms &amp; Conditions for Using jobkhojoAI</h1>
       <p style={{color:"var(--color-text-secondary)"}}>
         The information provided on jobkhojoAI is for informational purposes only, sourced from publicly
         available job and internship listings. For final eligibility, dates and process, always treat the

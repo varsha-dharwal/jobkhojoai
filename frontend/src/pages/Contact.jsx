@@ -8,7 +8,7 @@ export default function Contact(){
         description="Get in touch with jobkhojoAI for queries, corrections, or suggestions about tech job and internship listings across India and the USA."
         path="/contact"
       />
-      <h1>Contact Us</h1>
+      <h1>Contact jobkhojoAI</h1>
       <p style={{color:"var(--color-text-secondary)"}}>
         For any query, correction or suggestion, message us on Instagram:
         <br/><a href="https://instagram.com/jobkhojoAI" style={{color:"var(--color-brand)"}}>@jobkhojoAI</a>
