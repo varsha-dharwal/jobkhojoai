@@ -11,11 +11,35 @@
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { ROADMAP_CATEGORIES } from "../src/data/roadmaps.js";
+import { SKILL_ROADMAP_CATEGORIES } from "../src/data/skillRoadmaps.js";
 
 const SITE_URL = (process.env.SITE_URL || "https://jobkhojoai.com").replace(/\/$/, "");
 const API_URL = process.env.API_URL || "https://jobkhojoai-backend.onrender.com/api";
 
 const today = new Date().toISOString().slice(0, 10);
+
+const articleRoutes = [
+  "/career-insights",
+  "/career-guide/frontend-developer-roadmap-2026",
+  "/career-guide/react-developer-interview-preparation",
+  "/career-guide/how-to-spot-fake-job-posts",
+  "/career-guide/resume-guide-for-it-freshers",
+  "/career-guide/how-to-apply-for-remote-tech-jobs",
+  "/career-guide/salary-guide-for-indian-software-developers",
+  "/career-guide/github-portfolio-guide-for-freshers",
+  "/career-guide/internship-application-guide",
+  "/career-guide/frontend-vs-backend-development",
+  "/career-guide/javascript-interview-questions-with-explanations",
+  "/career-guide/how-to-build-a-job-ready-portfolio",
+  "/career-guide/interview-tips",
+  "/career-guide/resume-builder",
+];
+
+const roadmapRoutes = [
+  ...ROADMAP_CATEGORIES.map(r => `/roadmap/${r.slug}`),
+  ...SKILL_ROADMAP_CATEGORIES.map(r => `/skill-roadmap/${r.slug}`),
+];
 
 const staticRoutes = [
   { loc: "/", changefreq: "daily", priority: "1.0" },
@@ -23,16 +47,11 @@ const staticRoutes = [
   { loc: "/contact", changefreq: "monthly", priority: "0.5" },
   { loc: "/privacy-policy", changefreq: "yearly", priority: "0.3" },
   { loc: "/terms", changefreq: "yearly", priority: "0.3" },
-  { loc: "/career-insights", changefreq: "weekly", priority: "0.8" },
-  { loc: "/career-guide/frontend-developer-roadmap-2026", changefreq: "weekly", priority: "0.8" },
-  { loc: "/career-guide/react-developer-interview-preparation", changefreq: "weekly", priority: "0.8" },
-  { loc: "/career-guide/how-to-spot-fake-job-posts", changefreq: "weekly", priority: "0.8" },
-  { loc: "/career-guide/resume-guide-for-it-freshers", changefreq: "weekly", priority: "0.7" },
-  { loc: "/career-guide/how-to-apply-for-remote-tech-jobs", changefreq: "weekly", priority: "0.7" },
   { loc: "/disclaimer", changefreq: "yearly", priority: "0.3" },
   { loc: "/editorial-policy", changefreq: "yearly", priority: "0.3" },
   { loc: "/job-verification-policy", changefreq: "yearly", priority: "0.3" },
   { loc: "/content-correction-policy", changefreq: "yearly", priority: "0.3" },
+  ...[...articleRoutes, ...roadmapRoutes].map(loc => ({ loc, changefreq: "weekly", priority: "0.8" })),
 ].map(r => ({ ...r, lastmod: today }));
 
 async function fetchJobUrls() {

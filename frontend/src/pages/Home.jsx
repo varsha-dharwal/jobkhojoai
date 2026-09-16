@@ -202,6 +202,128 @@ export default function Home(){
       </motion.section>
 
       <motion.section
+        className="editorial-spotlight"
+        initial={{ opacity: 0, y: 18 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="section-heading editorial-heading">
+          <span className="hero-eyebrow"><span className="dot" aria-hidden="true" /> Why jobkhojoAI exists</span>
+          <h2>Original career guidance, verified jobs, and hiring insights.</h2>
+          <p>We help candidates discover roles, learn the market, avoid fake opportunities, and build stronger applications with practical guidance instead of generic job board noise.</p>
+        </div>
+
+        <div className="stats-grid" aria-label="Site quality metrics">
+          <div className="stat-card card">
+            <strong>Verified tech roles</strong>
+            <span>Updated job listings and tracked hiring opportunities for modern tech careers.</span>
+          </div>
+          <div className="stat-card card">
+            <strong>Career roadmaps</strong>
+            <span>Step-by-step learning paths for frontend, backend, data, and product roles.</span>
+          </div>
+          <div className="stat-card card">
+            <strong>Original guidance</strong>
+            <span>Practical advice on resumes, internships, interviews, and scam detection.</span>
+          </div>
+          <div className="stat-card card">
+            <strong>Trust-first content</strong>
+            <span>Clear editorial and verification policies built around user trust and quality.</span>
+          </div>
+        </div>
+
+        <div className="feature-grid">
+          <div className="card feature-card">
+            <span className="feature-tag">For freshers</span>
+            <h3>Learn what employers actually value</h3>
+            <p>From resume structure to internship strategy, our guides explain how to improve your application quality and improve recruiter response.</p>
+            <Link to="/career-insights" className="inline-link">Explore career insights →</Link>
+          </div>
+          <div className="card feature-card">
+            <span className="feature-tag">For professionals</span>
+            <h3>Upgrade your job search and interview prep</h3>
+            <p>Get stronger advice around remote hiring, portfolio-building, salary expectations, and interview preparation for real-world roles.</p>
+            <Link to="/career-guide/react-developer-interview-preparation" className="inline-link">Read interview prep →</Link>
+          </div>
+          <div className="card feature-card">
+            <span className="feature-tag">For everyone</span>
+            <h3>Protect yourself from low-quality or fake listings</h3>
+            <p>Our content includes practical checks for fake recruiters, vague job posts, and suspicious hiring practices before you share personal information.</p>
+            <Link to="/career-guide/how-to-spot-fake-job-posts" className="inline-link">Learn the warning signs →</Link>
+          </div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="original-guides"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="section-heading">
+          <h2>Original guidance for smarter applications and better career decisions</h2>
+          <p>Our editorial content is built to answer genuine job-search questions: how to write a better resume, avoid fake hiring traps, prepare for interviews, and choose a realistic career path.</p>
+        </div>
+
+        <div className="mini-guide-grid">
+          <Link to="/career-guide/resume-guide-for-it-freshers" className="card mini-guide-card">
+            <span className="guide-kicker">Resume</span>
+            <strong>Resume Guide for IT Freshers</strong>
+          </Link>
+          <Link to="/career-guide/internship-application-guide" className="card mini-guide-card">
+            <span className="guide-kicker">Internships</span>
+            <strong>Internship Application Guide</strong>
+          </Link>
+          <Link to="/career-guide/how-to-spot-fake-job-posts" className="card mini-guide-card">
+            <span className="guide-kicker">Scams</span>
+            <strong>How to Spot Fake Job Posts</strong>
+          </Link>
+          <Link to="/career-guide/salary-guide-for-indian-software-developers" className="card mini-guide-card">
+            <span className="guide-kicker">Salary</span>
+            <strong>Salary Guide for Indian Developers</strong>
+          </Link>
+          <Link to="/career-guide/github-portfolio-guide-for-freshers" className="card mini-guide-card">
+            <span className="guide-kicker">Portfolio</span>
+            <strong>GitHub Portfolio Guide for Freshers</strong>
+          </Link>
+          <Link to="/career-guide/javascript-interview-questions-with-explanations" className="card mini-guide-card">
+            <span className="guide-kicker">Interview</span>
+            <strong>JavaScript Interview Questions</strong>
+          </Link>
+        </div>
+      </motion.section>
+
+      <motion.section
+        className="trust-band"
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <div className="section-heading">
+          <h2>Our quality-first approach</h2>
+          <p>We focus on useful job discovery, practical career advice, and transparent editorial standards instead of producing low-value pages designed only for click-through traffic.</p>
+        </div>
+
+        <div className="policy-grid">
+          <div className="card policy-card">
+            <strong>Verified hiring focus</strong>
+            <p>Our job listings are organized around real hiring intent and user value, not keyword-heavy page duplication.</p>
+          </div>
+          <div className="card policy-card">
+            <strong>Editorial clarity</strong>
+            <p>Career stories, roadmaps, and guides are created to answer specific user questions with clear practical takeaways.</p>
+          </div>
+          <div className="card policy-card">
+            <strong>Trust and transparency</strong>
+            <p>We publish information about our policies, corrections, and editorial standards to support long-term reader trust.</p>
+          </div>
+        </div>
+      </motion.section>
+
+      <motion.section
         id="roadmaps"
         style={{marginBottom:"var(--space-12)", scrollMarginTop:90}}
         initial={{ opacity: 0, y: 16 }}

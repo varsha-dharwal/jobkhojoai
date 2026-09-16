@@ -9,6 +9,8 @@ export default function SEO({ title, description, path, noindex = false }){
     <>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="theme-color" content="#00c48c" />
       <link rel="canonical" href={url} />
       <meta name="robots" content={noindex ? "noindex, follow" : "index, follow"} />
       <meta property="og:type" content="website" />
@@ -16,9 +18,11 @@ export default function SEO({ title, description, path, noindex = false }){
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
-      <meta name="twitter:card" content="summary" />
+      <meta property="og:image" content="https://jobkhojoai.com/og-image.png" />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content="https://jobkhojoai.com/og-image.png" />
     </>
   );
 }

@@ -8,6 +8,9 @@ import CareerGuideMenu, { CAREER_GUIDE_LINKS } from "./CareerGuideMenu";
 
 const links = [
   { to: "/", label: "Home", end: true },
+  { to: "/career-insights", label: "Career Insights" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
 ];
 
 const DATE_OPTIONS = [
