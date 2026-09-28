@@ -18,12 +18,12 @@ function Field({ label, name, type="text", value, onChange, required=false }){
   );
 }
 
-function TextArea({ label, name, value, onChange, rows=5, hint }){
+function TextArea({ label, name, value, onChange, rows=5, hint, required=false }){
   return (
     <div style={{marginBottom:16}}>
       <label>{label}</label>
       {hint && <p style={{margin:"-4px 0 8px", fontSize:12, color:"var(--color-text-tertiary)"}}>{hint}</p>}
-      <textarea rows={rows} value={value || ""} onChange={e => onChange(name, e.target.value)} />
+      <textarea rows={rows} value={value || ""} onChange={e => onChange(name, e.target.value)} required={required} />
     </div>
   );
 }
@@ -174,7 +174,8 @@ export default function AdminJobForm(){
             value={form.roleDescription}
             onChange={update}
             rows={5}
-            hint="One or more paragraphs. Each new line becomes a new paragraph."
+            hint="Describe this specific role using verified listing details: the work, team or product context, and required experience. Don't add facts that aren't in the source."
+            required
           />
           <TextArea
             label="Key Responsibilities"
@@ -206,7 +207,7 @@ export default function AdminJobForm(){
         </FormSection>
 
         <FormSection title="Apply Link">
-          <Field label="Official Apply Link" name="applyLink" value={form.applyLink} onChange={update} required />
+          <Field label="Official Apply Link" name="applyLink" type="url" value={form.applyLink} onChange={update} required />
         </FormSection>
 
         {error && <p style={{color:"var(--color-danger)", fontSize:13, marginBottom:12}}>{error}</p>}

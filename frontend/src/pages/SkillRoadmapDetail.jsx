@@ -23,8 +23,9 @@ export default function SkillRoadmapDetail(){
     <main className="container" style={{paddingTop:32, paddingBottom:60}}>
       <SEO
         title={`${meta.label} Roadmap | jobkhojoAI`}
-        description={`Step-by-step ${meta.label} learning roadmap — coming soon on jobkhojoAI.`}
+        description={roadmap?.tagline || `Step-by-step ${meta.label} learning roadmap — coming soon on jobkhojoAI.`}
         path={`/skill-roadmap/${slug}`}
+        noindex={!roadmap?.steps?.length}
       />
 
       <motion.div

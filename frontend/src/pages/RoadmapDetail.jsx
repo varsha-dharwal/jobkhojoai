@@ -6,7 +6,7 @@ import FAQSection from "../components/FAQSection";
 import AdSlot from "../components/AdSlot";
 import SEO from "../components/SEO";
 import { ROADMAPS, HIRING_COMPANIES } from "../data/roadmaps";
-import { SKILL_ROADMAP_CATEGORIES } from "../data/skillRoadmaps";
+import { SKILL_ROADMAP_CATEGORIES, SKILL_ROADMAPS } from "../data/skillRoadmaps";
 import { AD_SLOTS } from "../config/adsense";
 
 const TIER_LABELS = ["Beginner Project Ideas", "Intermediate Project Ideas", "Advanced Project Ideas"];
@@ -39,7 +39,9 @@ export default function RoadmapDetail(){
   // only for now, gated by whether relatedRoadmaps is defined on this roadmap's data.
   const isEnhanced = Boolean(roadmap.relatedRoadmaps?.length);
   const relatedLinks = isEnhanced
-    ? roadmap.relatedRoadmaps.map(s => SKILL_ROADMAP_CATEGORIES.find(c => c.slug === s)).filter(Boolean)
+    ? roadmap.relatedRoadmaps
+      .map(slug => SKILL_ROADMAP_CATEGORIES.find(category => category.slug === slug && SKILL_ROADMAPS[slug]?.steps?.length))
+      .filter(Boolean)
     : [];
   const projectTiers = isEnhanced ? getProjectTiers(roadmap) : null;
 
