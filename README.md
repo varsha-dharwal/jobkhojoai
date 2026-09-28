@@ -24,6 +24,7 @@ Fill in `.env`:
 - `MONGODB_URI` — get a free cluster at mongodb.com/atlas, copy the connection string
 - `JWT_SECRET` — any long random string
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — your own admin login (this is the only account, used for the admin panel)
+- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` — send email verification codes and welcome emails. Create a Resend API key and verify the sending domain before using a real sender address.
 
 Run it:
 ```
@@ -32,6 +33,8 @@ npm run dev
 Server runs on http://localhost:5000
 
 ## 2. Frontend setup
+
+Job seekers create an account from Apply Now using their name, email, and phone number, then verify a 6-digit code sent to their email. Successful verification records the apply click and sends the welcome email once. Returning users sign in with an email verification code. Email delivery uses Resend; configure `RESEND_API_KEY` and a verified `RESEND_FROM_EMAIL` locally and in the deployed backend environment.
 
 ```
 cd frontend

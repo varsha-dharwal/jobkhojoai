@@ -8,6 +8,7 @@ import jobRoutes from "./routes/jobs.js";
 import aiRoutes from "./routes/ai.js";
 import userRoutes from "./routes/users.js";
 import resumeAiRoutes from "./routes/resumeAi.js";
+import adminAnalyticsRoutes from "./routes/adminAnalytics.js";
 
 dotenv.config();
 
@@ -56,7 +57,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "6mb" }));
 
 app.get("/", (req, res) => res.json({ status: "jobkhojoAI API running" }));
 app.use("/api/auth", authRoutes);
@@ -64,6 +65,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/resume-ai", resumeAiRoutes);
+app.use("/api/admin", adminAnalyticsRoutes);
 
 // 404 fallback for unknown API routes
 app.use("/api", (req, res) => res.status(404).json({ message: "Route not found" }));

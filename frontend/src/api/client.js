@@ -16,7 +16,10 @@ const api = axios.create({
 
 // attach admin token automatically if present
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("jobkhojoai_token");
+  const isUserRequest = config.url?.startsWith("/users") || config.url?.startsWith("/resume-ai");
+  const token = isUserRequest
+    ? localStorage.getItem("jobkhojoai_user_token")
+    : localStorage.getItem("jobkhojoai_token") || localStorage.getItem("jobkhojoai_user_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });

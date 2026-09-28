@@ -1,5 +1,6 @@
 import express from "express";
 import Job from "../models/Job.js";
+import JobReport from "../models/JobReport.js";
 import { requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -50,6 +51,25 @@ router.get("/meta/companies", async (req, res) => {
     res.json(companies);
   } catch (err) {
     res.status(500).json({ message: "Could not load companies", error: err.message });
+  }
+});
+
+// POST /api/jobs/:jobId/report
+router.post("/:jobId/report", async (req, res) => {
+  const reasons = ["Job is closed or expired", "Incorrect job information", "Suspicious or unsafe listing"];
+  if (!/^[a-f\d]{24}$/i.test(req.params.jobId)) return res.status(400).json({ message: "Invalid job id" });
+  if (!reasons.includes(req.body.reason)) return res.status(400).json({ message: "Choose a valid report reason" });
+  try {
+    const job = await Job.findById(req.params.jobId).select("_id");
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    const report = await JobReport.create({
+      job: job._id,
+      reason: req.body.reason,
+      details: typeof req.body.details === "string" ? req.body.details.slice(0, 1000) : "",
+    });
+    res.status(201).json({ reported: true, id: report._id });
+  } catch (err) {
+    res.status(500).json({ message: "Could not submit report", error: err.message });
   }
 });
 

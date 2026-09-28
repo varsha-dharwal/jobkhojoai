@@ -11,6 +11,15 @@ function CloseIcon(){
   );
 }
 
+function AskAIIcon(){
+  return (
+    <svg className="ask-ai-trigger-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3.5 13.4 9l5.1 1.5-5.1 1.5L12 17.5l-1.4-5.5-5.1-1.5L10.6 9 12 3.5Z" fill="currentColor" />
+      <path d="m19 15 .6 2.4L22 18l-2.4.6L19 21l-.6-2.4L16 18l2.4-.6L19 15Z" fill="currentColor" opacity=".72" />
+    </svg>
+  );
+}
+
 function TypingDots(){
   return (
     <span className="ai-typing-dots" aria-hidden="true">
@@ -103,7 +112,7 @@ export default function AskAI(){
         </div>
       )}
       <button type="button" className="ask-ai-trigger" onClick={() => setOpen(o => !o)} aria-expanded={open}>
-        <AiAvatar size={26} />
+        <AskAIIcon />
         {ASSISTANT_NAME}
       </button>
     </div>

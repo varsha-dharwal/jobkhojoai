@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { MotionConfig } from "motion/react";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -7,11 +7,14 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CustomCursor from "./components/CustomCursor";
 import AskAI from "./components/AskAI";
+import UserActivityTracker from "./components/UserActivityTracker";
 
 import Home from "./pages/Home";
 
 const JobDetail = lazy(() => import("./pages/JobDetail"));
-const SavedJobs = lazy(() => import("./pages/SavedJobs"));
+const MyJobs = lazy(() => import("./pages/MyJobs"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Profile = lazy(() => import("./pages/Profile"));
 const RoadmapDetail = lazy(() => import("./pages/RoadmapDetail"));
 const SkillRoadmapDetail = lazy(() => import("./pages/SkillRoadmapDetail"));
 const About = lazy(() => import("./pages/About"));
@@ -31,6 +34,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminJobs = lazy(() => import("./pages/admin/AdminJobs"));
 const AdminJobForm = lazy(() => import("./pages/admin/AdminJobForm"));
+const AdminTodayUpdate = lazy(() => import("./pages/admin/AdminTodayUpdate"));
 
 export default function App(){
   return (
@@ -41,10 +45,14 @@ export default function App(){
         <Navbar />
         <ErrorBoundary>
           <Suspense fallback={null}>
+            <UserActivityTracker />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/jobs/:slug" element={<JobDetail />} />
-              <Route path="/saved-jobs" element={<SavedJobs />} />
+              <Route path="/saved-jobs" element={<Navigate to="/my-jobs" replace />} />
+              <Route path="/my-jobs" element={<MyJobs />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/roadmap/:slug" element={<RoadmapDetail />} />
               <Route path="/skill-roadmap/:slug" element={<SkillRoadmapDetail />} />
               <Route path="/about" element={<About />} />
@@ -62,6 +70,7 @@ export default function App(){
 
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/jobs" element={<ProtectedRoute><AdminJobs /></ProtectedRoute>} />
+              <Route path="/admin/today-update" element={<ProtectedRoute><AdminTodayUpdate /></ProtectedRoute>} />
               <Route path="/admin/jobs/new" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
               <Route path="/admin/jobs/:id/edit" element={<ProtectedRoute><AdminJobForm /></ProtectedRoute>} />
 

@@ -44,6 +44,7 @@ export default function AdminJobs(){
       <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:24, gap:12, flexWrap:"wrap"}}>
         <h1 style={{fontSize:22}}>Manage Jobs</h1>
         <div style={{display:"flex", gap:10, flexWrap:"wrap"}}>
+          <Link to="/admin/today-update" className="btn btn-ghost">Today Update</Link>
           <Link to="/admin/jobs/new" className="btn btn-primary">+ Add Job</Link>
           <button className="btn btn-ghost" onClick={logout}>Logout</button>
         </div>

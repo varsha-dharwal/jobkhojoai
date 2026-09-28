@@ -4,6 +4,10 @@ import api from "../api/client";
 import CompanyAvatar from "../components/CompanyAvatar";
 import { timeAgo } from "../utils/timeAgo";
 import { isJobSaved, toggleSavedJob } from "../utils/savedJobs";
+import { recordApplication } from "../utils/myJobs";
+import { migrateGuestJobsToAccount } from "../utils/myJobs";
+import { isLoggedIn } from "../utils/userAuth";
+import AuthModal from "../components/resume-builder/AuthModal";
 import SEO from "../components/SEO";
 import { getJobCountry } from "../utils/jobCountry";
 import AdSlot from "../components/AdSlot";
@@ -89,16 +93,48 @@ export default function JobDetail(){
   const [state, setState] = useState("loading"); // loading | ready | notfound | error
   const [saved, setSaved] = useState(false);
   const [justShared, setJustShared] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [showApplyAuth, setShowApplyAuth] = useState(false);
 
   useEffect(() => {
     setState("loading");
     api.get(`/jobs/${slug}`)
-      .then(res => { setJob(res.data); setState("ready"); setSaved(isJobSaved(res.data._id)); })
+      .then(res => {
+        setJob(res.data);
+        setState("ready");
+        setSaved(isJobSaved(res.data._id));
+      })
       .catch(err => setState(err.response?.status === 404 ? "notfound" : "error"));
   }, [slug]);
 
   function handleToggleSave(){
     setSaved(toggleSavedJob(job));
+  }
+
+  function applyAndTrack(){
+    setActionError("");
+    recordApplication(job);
+    const popup = window.open(job.applyLink, "_blank");
+    if (popup) popup.opener = null;
+    else window.location.href = job.applyLink;
+  }
+
+  function handleApply(){
+    if (!isLoggedIn()) {
+      setShowApplyAuth(true);
+      return;
+    }
+    applyAndTrack();
+  }
+
+  async function handleApplyAuthSuccess({ mode, guestJobs }){
+    setShowApplyAuth(false);
+    if (mode === "register") {
+      try { await migrateGuestJobsToAccount(guestJobs.savedJobs, guestJobs.applications); }
+      catch { /* The current application is still recorded below and kept locally if offline. */ }
+    }
+    await recordApplication(job);
+    window.location.assign(job.applyLink);
   }
 
   async function handleShare(){
@@ -243,12 +279,14 @@ export default function JobDetail(){
         </button>
       </div>
 
-      <a href={job.applyLink} target="_blank" rel="noopener noreferrer" className="btn btn-primary" style={{width:"100%", padding:"16px 0", fontSize:16}}>
+      <button type="button" onClick={handleApply} className="btn btn-primary" style={{width:"100%", padding:"16px 0", fontSize:16}}>
         Apply Now — Official Website ↗
-      </a>
+      </button>
+      {actionError && <p role="alert" style={{fontSize:12, color:"var(--color-danger)", marginTop:10, textAlign:"center"}}>{actionError}</p>}
       <p style={{fontSize:12, color:"var(--color-text-tertiary)", marginTop:10, textAlign:"center"}}>
-        You will be redirected to the official recruiter's website. jobkhojoAI does not collect applications.
+        Sign in or create an account to continue to the official recruiter&apos;s website. Your application click is tracked privately in My Jobs.
       </p>
+      {showApplyAuth && <AuthModal context="apply for this job" defaultMode="register" onClose={() => setShowApplyAuth(false)} onSuccess={handleApplyAuthSuccess} />}
       </div>
 
       <aside className="job-detail-ad-sidebar">

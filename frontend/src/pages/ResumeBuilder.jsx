@@ -19,7 +19,8 @@ import SummaryStep from "../components/resume-builder/steps/SummaryStep";
 import ReviewStep from "../components/resume-builder/steps/ReviewStep";
 
 function isDraftEmpty(resume) {
-  return !resume.personal.fullName && (resume.projects || []).length === 0;
+  const hasSkills = Object.values(resume.skills || {}).some((values) => (Array.isArray(values) ? values : [values]).some(Boolean));
+  return !resume.personal?.fullName && !resume.personal?.targetTitle && !hasSkills && (resume.projects || []).length === 0;
 }
 
 // @react-pdf/renderer is ~450KB gzipped — dynamically imported only when the
@@ -62,20 +63,43 @@ function BuilderInner() {
   const { resume, setResume, updateSection, updateField, stage, setStage, stepIndex, setStepIndex, goToStep, resetResume } = useResume();
   const [showAuth, setShowAuth] = useState(false);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [resumeReady, setResumeReady] = useState(!isLoggedIn());
   const [mobileTab, setMobileTab] = useState("edit");
 
   // Pull a saved server resume only if there's nothing meaningful in the local draft yet.
   useEffect(() => {
-    if (!loggedIn || !isDraftEmpty(resume)) return;
+    if (!loggedIn) {
+      setResumeReady(true);
+      return;
+    }
+    if (!isDraftEmpty(resume)) {
+      setResumeReady(true);
+      return;
+    }
+    let active = true;
     api.get("/users/me/resume", { headers: { Authorization: `Bearer ${getUserToken()}` } })
-      .then((res) => { if (res.data.resumeDraft) setResume({ ...EMPTY_RESUME, ...res.data.resumeDraft }); })
-      .catch(() => {});
+      .then((res) => {
+        if (!active) return;
+        if (res.data.resumeDraft) setResume({ ...EMPTY_RESUME, ...res.data.resumeDraft });
+      })
+      .catch(() => {})
+      .finally(() => { if (active) setResumeReady(true); });
+    return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedIn]);
+
+  useEffect(() => {
+    if (!loggedIn || !resumeReady) return;
+    const timer = setTimeout(() => {
+      api.put("/users/me/resume", resume, { headers: { Authorization: `Bearer ${getUserToken()}` } }).catch(() => {});
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [loggedIn, resumeReady, resume]);
 
   function handleAuthSuccess() {
     setShowAuth(false);
     setLoggedIn(true);
+    setResumeReady(true);
     api.put("/users/me/resume", resume, { headers: { Authorization: `Bearer ${getUserToken()}` } }).catch(() => {});
   }
 

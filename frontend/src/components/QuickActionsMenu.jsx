@@ -26,7 +26,7 @@ export function BookmarkIcon(){
 }
 
 // Replaces the About/Contact/Privacy/Terms links in the header — those, plus
-// Saved Jobs, live inside this icon-triggered dropdown instead. `onNavigate` lets
+// My Jobs, live inside this icon-triggered dropdown instead. `onNavigate` lets
 // the mobile menu also close itself when an item here is picked.
 export default function QuickActionsMenu({ onNavigate }){
   const [open, setOpen] = useState(false);
@@ -69,8 +69,8 @@ export default function QuickActionsMenu({ onNavigate }){
       </button>
       {open && (
         <div className="filter-dropdown-panel quick-actions-panel" role="menu">
-          <NavLink to="/saved-jobs" className="quick-actions-item" onClick={pick}>
-            <BookmarkIcon /> Saved Jobs
+          <NavLink to="/my-jobs" className="quick-actions-item" onClick={pick}>
+            <BookmarkIcon /> My Jobs
             {savedCount > 0 && <span className="quick-actions-badge">{savedCount}</span>}
           </NavLink>
           <div className="quick-actions-divider" />
