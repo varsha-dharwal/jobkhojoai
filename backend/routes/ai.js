@@ -1,5 +1,6 @@
 import express from "express";
 import Job from "../models/Job.js";
+import { publicJobFilter } from "../utils/publicJobs.js";
 
 const router = express.Router();
 
@@ -46,7 +47,7 @@ router.post("/chat", async (req, res) => {
   }
 
   try {
-    const jobs = await Job.find({ status: "active" })
+    const jobs = await Job.find(publicJobFilter())
       .sort({ createdAt: -1 })
       .limit(40)
       .select("title organization category remote location salaryMin slug");

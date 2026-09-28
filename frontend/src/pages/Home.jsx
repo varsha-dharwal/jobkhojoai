@@ -10,7 +10,7 @@ import JobShelf from "../components/JobShelf";
 import SkeletonCards from "../components/SkeletonCards";
 import SEO, { SITE_URL } from "../components/SEO";
 import { ROADMAP_CATEGORIES, ROADMAPS } from "../data/roadmaps";
-import { SKILL_ROADMAP_CATEGORIES } from "../data/skillRoadmaps";
+import { SKILL_ROADMAP_CATEGORIES, SKILL_ROADMAPS } from "../data/skillRoadmaps";
 import { getJobCountry } from "../utils/jobCountry";
 import { slugify } from "../utils/slugify";
 
@@ -83,6 +83,8 @@ const PROJECT_CATEGORIES = ROADMAP_CATEGORIES.map(r => {
   const projectsStep = ROADMAPS[r.slug]?.steps.find(s => s.topics?.[0]?.subject === "Projects");
   return projectsStep ? { slug: r.slug, label: r.label, anchor: slugify(projectsStep.title) } : null;
 }).filter(Boolean);
+
+const PUBLISHED_SKILL_ROADMAPS = SKILL_ROADMAP_CATEGORIES.filter(s => SKILL_ROADMAPS[s.slug]?.steps?.length);
 
 // Extra filters driven by the header's search bar (date posted / on-site / experience
 // level) aren't covered by the backend's category+remote params, so they're applied
@@ -348,7 +350,7 @@ export default function Home(){
               { slug: "frontend-developer-roadmap-2026", label: "Frontend Developer Roadmap 2026" },
               { slug: "react-developer-interview-preparation", label: "React Interview Prep" },
               { slug: "how-to-spot-fake-job-posts", label: "How to Spot Fake Job Posts" },
-            ].map((item, i) => (
+            ].map(item => (
               <Link key={item.slug} to={`/career-guide/${item.slug}`} className="roadmap-card" style={{ opacity: 1, transform: "none" }}>
                 <span>{item.label}</span>
                 <RoadmapCardIcon />
@@ -363,12 +365,14 @@ export default function Home(){
           items={ROADMAP_CATEGORIES}
           hrefFor={r => `/roadmap/${r.slug}`}
         />
-        <RoadmapGridBlock
-          badge="Skill-based Roadmaps"
-          subtitle="Going deep on one skill? Start here."
-          items={SKILL_ROADMAP_CATEGORIES}
-          hrefFor={s => `/skill-roadmap/${s.slug}`}
-        />
+        {PUBLISHED_SKILL_ROADMAPS.length > 0 && (
+          <RoadmapGridBlock
+            badge="Skill-based Roadmaps"
+            subtitle="Going deep on one skill? Start here."
+            items={PUBLISHED_SKILL_ROADMAPS}
+            hrefFor={s => `/skill-roadmap/${s.slug}`}
+          />
+        )}
         <RoadmapGridBlock
           badge="Project Ideas"
           subtitle="Real build ideas, pulled straight from each roadmap."

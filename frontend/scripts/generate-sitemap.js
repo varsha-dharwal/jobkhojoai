@@ -12,7 +12,7 @@ import { writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ROADMAP_CATEGORIES } from "../src/data/roadmaps.js";
-import { SKILL_ROADMAP_CATEGORIES } from "../src/data/skillRoadmaps.js";
+import { SKILL_ROADMAP_CATEGORIES, SKILL_ROADMAPS } from "../src/data/skillRoadmaps.js";
 
 const SITE_URL = (process.env.SITE_URL || "https://jobkhojoai.com").replace(/\/$/, "");
 const API_URL = process.env.API_URL || "https://jobkhojoai-backend.onrender.com/api";
@@ -38,7 +38,9 @@ const articleRoutes = [
 
 const roadmapRoutes = [
   ...ROADMAP_CATEGORIES.map(r => `/roadmap/${r.slug}`),
-  ...SKILL_ROADMAP_CATEGORIES.map(r => `/skill-roadmap/${r.slug}`),
+  ...SKILL_ROADMAP_CATEGORIES
+    .filter(r => SKILL_ROADMAPS[r.slug]?.steps?.length)
+    .map(r => `/skill-roadmap/${r.slug}`),
 ];
 
 const staticRoutes = [

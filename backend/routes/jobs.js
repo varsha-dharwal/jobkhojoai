@@ -1,6 +1,8 @@
 import express from "express";
 import Job from "../models/Job.js";
 import { requireAdmin } from "../middleware/auth.js";
+import { publicJobFilter } from "../utils/publicJobs.js";
+import { validateJob } from "../utils/jobValidation.js";
 
 const router = express.Router();
 
@@ -19,13 +21,13 @@ function makeSlug(title, organization) {
 router.get("/", async (req, res) => {
   try {
     const { category, remote, search, company, limit } = req.query;
-    const filter = { status: "active" };
+    const filter = {};
     if (category && category !== "All") filter.category = category;
     if (remote === "true") filter.remote = true;
     if (company) filter.organization = company;
     if (search) filter.$text = { $search: search };
 
-    let query = Job.find(filter).sort({ createdAt: -1 });
+    let query = Job.find(publicJobFilter(filter)).sort({ createdAt: -1 });
     if (limit) query = query.limit(Number(limit));
     const jobs = await query;
     res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=300");
@@ -39,7 +41,7 @@ router.get("/", async (req, res) => {
 router.get("/meta/companies", async (req, res) => {
   try {
     const companies = await Job.aggregate([
-      { $match: { status: "active" } },
+      { $match: publicJobFilter() },
       { $sort: { createdAt: -1 } },
       { $group: { _id: "$organization", jobCount: { $sum: 1 }, logoUrl: { $first: "$logoUrl" } } },
       { $sort: { jobCount: -1 } },
@@ -56,7 +58,7 @@ router.get("/meta/companies", async (req, res) => {
 // GET /api/jobs/:slug
 router.get("/:slug", async (req, res) => {
   try {
-    const job = await Job.findOne({ slug: req.params.slug });
+    const job = await Job.findOne(publicJobFilter({ slug: req.params.slug }));
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
     res.json(job);
@@ -77,6 +79,8 @@ router.get("/admin/all", requireAdmin, async (req, res) => {
 router.post("/", requireAdmin, async (req, res) => {
   try {
     const body = req.body;
+    const validationError = validateJob(body);
+    if (validationError) return res.status(400).json({ message: validationError });
     const job = await Job.create({
       ...body,
       slug: makeSlug(body.title, body.organization),
@@ -90,8 +94,14 @@ router.post("/", requireAdmin, async (req, res) => {
 // PUT /api/jobs/:id
 router.put("/:id", requireAdmin, async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!job) return res.status(404).json({ message: "Job not found" });
+    const existing = await Job.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: "Job not found" });
+    const contentFields = ["title", "organization", "roleDescription", "applyLink"];
+    if (contentFields.some(field => Object.hasOwn(req.body, field))) {
+      const validationError = validateJob({ ...existing.toObject(), ...req.body });
+      if (validationError) return res.status(400).json({ message: validationError });
+    }
+    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.json(job);
   } catch (err) {
     res.status(400).json({ message: "Could not update job", error: err.message });
