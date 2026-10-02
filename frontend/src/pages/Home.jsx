@@ -1,493 +1,312 @@
-import { useEffect, useState } from "react";
-import { useLocation, useSearchParams, Link } from "react-router-dom";
-import { motion } from "motion/react";
-import api from "../api/client";
-import JobSlider from "../components/JobSlider";
-import VideoBackground from "../components/VideoBackground";
-import FAQSection from "../components/FAQSection";
-import FeaturedCompanies from "../components/FeaturedCompanies";
-import JobShelf from "../components/JobShelf";
-import SkeletonCards from "../components/SkeletonCards";
-import SEO, { SITE_URL } from "../components/SEO";
-import { ROADMAP_CATEGORIES, ROADMAPS } from "../data/roadmaps";
-import { SKILL_ROADMAP_CATEGORIES, SKILL_ROADMAPS } from "../data/skillRoadmaps";
-import { getJobCountry } from "../utils/jobCountry";
-import { slugify } from "../utils/slugify";
+import { useEffect } from "react";
+import { Form, Link, useLoaderData, useLocation, useNavigate } from "react-router";
+import {
+  ArrowRight, Search, MapPin, ChevronRight, CircleCheck, Link2, ShieldCheck, UserRound, GraduationCap,
+  House, Building2, FileText, SquareArrowOutUpRight, Code2, Server, Layers, BarChart3, Palette, Cloud,
+} from "lucide-react";
+import SEO, { JsonLd, SITE_URL } from "../components/SEO";
+import { JobTile } from "../components/JobCard";
+import { fetchAllJobs, toListJob } from "../lib/api";
+import { experienceLevel, isRemote } from "../lib/jobs";
+import { guideMeta, readingMinutes } from "../lib/guides";
+import { ROADMAPS } from "../data/roadmaps";
+import { CAREER_GUIDE_ARTICLES } from "../data/careerGuides";
+import { legacyJobsUrl } from "../lib/jobFilters";
 
-const MotionTagLink = motion.create(Link);
+const CITY_GROUPS = [
+  { label: "Bengaluru", q: "bengaluru", re: /bangalore|bengaluru|benguluru/i },
+  { label: "Hyderabad", q: "hyderabad", re: /hyderabad/i },
+  { label: "Mumbai", q: "mumbai", re: /mumbai/i },
+  { label: "Pune", q: "pune", re: /pune/i },
+  { label: "Chennai", q: "chennai", re: /chennai/i },
+  { label: "Delhi NCR", q: "noida", re: /delhi|noida|gurugram|gurgaon/i },
+];
 
-function RoadmapCardIcon(){
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
+const FEATURED_PATHS = ["frontend", "backend", "full-stack", "data-science"];
+const FEATURED_GUIDES = ["resume-guide-for-it-freshers", "how-to-spot-fake-job-posts", "internship-application-guide"];
 
-// One stacked, full-width block: a centered pill badge as the section label, then a
-// 3-column grid of card-buttons — matches the roadmap.sh layout pattern (stacked
-// groups of a card grid each), redone in jobkhojoAI's own dark/teal theme.
-function RoadmapGridBlock({ badge, subtitle, items, hrefFor }){
-  return (
-    <div className="roadmap-grid-block">
-      <div className="roadmap-grid-badge-row">
-        <span className="roadmap-grid-badge">{badge}</span>
-      </div>
-      {subtitle && <p className="roadmap-grid-subtitle">{subtitle}</p>}
-      <div className="roadmap-card-grid">
-        {items.map((item, i) => (
-          <MotionTagLink
-            key={item.slug}
-            to={hrefFor(item)}
-            className="roadmap-card"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.03, ease: "easeOut" }}
-            whileHover={{ borderColor: "var(--color-brand)", color: "var(--color-text-primary)" }}
-          >
-            <span>{item.label}</span>
-            <RoadmapCardIcon />
-          </MotionTagLink>
-        ))}
-      </div>
-    </div>
-  );
+// Runs at build time; every number on the page is counted from the real listings.
+export async function loader(){
+  const jobs = await fetchAllJobs();
+  const count = test => jobs.filter(test).length;
+  const topCity = CITY_GROUPS
+    .map(c => ({ ...c, n: count(j => c.re.test(j.location || "")) }))
+    .sort((a, b) => b.n - a.n)[0];
+  return {
+    latest: jobs.slice(0, 8).map(toListJob),
+    total: jobs.length,
+    browse: [
+      { key: "fresher", to: "/jobs?exp=fresher", label: "Freshers", n: count(j => experienceLevel(j) === "fresher") },
+      { key: "internship", to: "/jobs?type=internship", label: "Internships", n: count(j => j.category === "Internship") },
+      { key: "remote", to: "/jobs?mode=remote", label: "Remote jobs", n: count(isRemote) },
+      ...(topCity?.n ? [{ key: "city", to: `/jobs?location=${topCity.q}`, label: `Jobs in ${topCity.label}`, n: topCity.n }] : []),
+    ].filter(t => t.n > 0).map(({ key, to, label, n }) => ({ key, to, label, n })),
+    paths: FEATURED_PATHS.filter(slug => ROADMAPS[slug]).map(slug => ({ slug, title: ROADMAPS[slug].title, steps: ROADMAPS[slug].steps.length })),
+    guides: FEATURED_GUIDES
+      .map(slug => CAREER_GUIDE_ARTICLES.find(a => a.slug === slug))
+      .filter(Boolean)
+      .map(a => ({ slug: a.slug, title: a.title, summary: a.summary, minutes: readingMinutes(a) })),
+  };
 }
 
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "jobkhojoAI",
+  name: "JobKhojo",
   url: SITE_URL,
-  logo: `${SITE_URL}/favicon.svg`,
+  logo: `${SITE_URL}/images/logo-mark.png`,
   sameAs: ["https://instagram.com/jobkhojoAI"],
-  areaServed: ["IN", "US"],
 };
 
 const WEBSITE_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "jobkhojoAI",
+  name: "JobKhojo",
   url: SITE_URL,
   potentialAction: {
     "@type": "SearchAction",
-    target: `${SITE_URL}/?search={search_term_string}#jobs`,
+    target: `${SITE_URL}/jobs?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
 
-// Project Ideas pulls real project names straight out of each role roadmap's own
-// "Projects" step (data/roadmaps.js) instead of duplicating fresh content — the anchor
-// lets a click land directly on that step inside the full roadmap page.
-const PROJECT_CATEGORIES = ROADMAP_CATEGORIES.map(r => {
-  const projectsStep = ROADMAPS[r.slug]?.steps.find(s => s.topics?.[0]?.subject === "Projects");
-  return projectsStep ? { slug: r.slug, label: r.label, anchor: slugify(projectsStep.title) } : null;
-}).filter(Boolean);
+const BROWSE_ICONS = { fresher: UserRound, internship: GraduationCap, remote: House, city: Building2 };
+const PATH_ICONS = { frontend: Code2, backend: Server, "full-stack": Layers, "data-science": BarChart3, "ui-ux": Palette, cloud: Cloud };
 
-const PUBLISHED_SKILL_ROADMAPS = SKILL_ROADMAP_CATEGORIES.filter(s => SKILL_ROADMAPS[s.slug]?.steps?.length);
-
-// Extra filters driven by the header's search bar (date posted / on-site / experience
-// level) aren't covered by the backend's category+remote params, so they're applied
-// as a client-side pass on top of the fetched list, on top of whatever this page's own
-// search/category/remote controls already narrowed down.
-const EXPERIENCE_LEVEL_TESTS = {
-  fresher: /fresh|entry|graduate|0\s*-?\s*1|intern/i,
-  mid: /mid[\s-]?level|associate|\b[1-4]\+?\s*(years|yrs|yr)\b/i,
-  senior: /senior|lead|principal|manager|\b[5-9]\+?\s*(years|yrs|yr)\b/i,
+const HERO_IMAGE = {
+  srcSet: "/images/hero-candidate-560.webp 560w, /images/hero-candidate-1120.webp 1120w",
+  sizes: "(min-width: 1300px) 600px, 46vw",
 };
-const DATE_POSTED_LIMITS_MS = { "24h": 864e5, week: 6048e5, month: 2592e6 };
+
+function SectionHead({ id, title, subtitle, link }){
+  return (
+    <div className="home-head">
+      <div>
+        <h2 id={id}>{title}</h2>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+      {link && <Link to={link.to} className="link-arrow">{link.label} <ArrowRight size={16} aria-hidden="true" /></Link>}
+    </div>
+  );
+}
 
 export default function Home(){
+  const { latest, total, browse, paths, guides } = useLoaderData();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const [jobs, setJobs] = useState([]);
-  const [category, setCategory] = useState("All");
-  const [remoteOnly, setRemoteOnly] = useState(false);
-  const [search, setSearch] = useState("");
-  const [companyFilter, setCompanyFilter] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  // Header-only filters (see Navbar) — not shown as controls on this page, only applied.
-  const [onsiteOnly, setOnsiteOnly] = useState(false);
-  const [datePosted, setDatePosted] = useState("");
-  const [experienceLevels, setExperienceLevels] = useState([]);
-  const [country, setCountry] = useState("");
-
-  // Sync filters from the URL — lets internal links (e.g. the header search, the FAQ,
-  // or a Featured Companies tile) deep-link into a filtered view even when already on this page.
+  // Old links pointed at "/?search=…#jobs" and "/#roadmaps" — send them to the new pages.
   useEffect(() => {
-    const c = searchParams.get("category");
-    setCategory(c === "Full-time" || c === "Part-time" || c === "Internship" ? c : "All");
-    setRemoteOnly(searchParams.get("remote") === "true");
-    setOnsiteOnly(searchParams.get("remote") === "false");
-    setSearch(searchParams.get("search") || "");
-    setCompanyFilter(searchParams.get("company") || "");
-    setDatePosted(searchParams.get("datePosted") || "");
-    setExperienceLevels((searchParams.get("experience") || "").split(",").filter(Boolean));
-    setCountry(searchParams.get("country") || "");
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (location.hash === "#jobs") {
-      document.getElementById("jobs")?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [location]);
-
-  useEffect(() => {
-    setLoading(true);
-    setError("");
-    const params = {};
-    if (category !== "All") params.category = category;
-    if (remoteOnly) params.remote = "true";
-    if (search) params.search = search;
-    if (companyFilter) params.company = companyFilter;
-
-    api.get("/jobs", { params })
-      .then(res => setJobs(res.data))
-      .catch(() => setError("Couldn't load jobs. Please try again in a moment."))
-      .finally(() => setLoading(false));
-  }, [category, remoteOnly, search, companyFilter]);
-
-  const visibleJobs = jobs.filter(job => {
-    if (onsiteOnly && job.remote) return false;
-    // Remote jobs are shown for either region — only on-site jobs get filtered by country.
-    if (country && !job.remote && getJobCountry(job) !== country) return false;
-    if (experienceLevels.length){
-      const text = `${job.experience || ""} ${job.title || ""}`;
-      if (!experienceLevels.some(level => EXPERIENCE_LEVEL_TESTS[level].test(text))) return false;
-    }
-    if (datePosted && Date.now() - new Date(job.createdAt).getTime() > DATE_POSTED_LIMITS_MS[datePosted]) return false;
-    return true;
-  });
+    const legacy = legacyJobsUrl(location.search, location.hash);
+    if (legacy) navigate(legacy, { replace: true });
+    else if (location.hash === "#roadmaps") navigate("/career-paths", { replace: true });
+  }, [location.search, location.hash, navigate]);
 
   return (
-    <main className="container">
+    <main className="home">
       <SEO
-        title="Tech Jobs & Internships | jobkhojoAI"
-        description="Find verified tech jobs, internships, and remote-friendly roles in India and the USA. Explore career roadmaps, job alerts, and practical hiring advice on jobkhojoAI."
+        title="JobKhojo — Jobs & Internships for Freshers and Early-Career Professionals in India"
+        description="Find fresh jobs and internships in software, IT, design, data and support roles. Clear job details, a direct link to apply, plus career paths and practical guides."
         path="/"
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }} />
-      <motion.section
-        className="hero video-section"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <VideoBackground src="/videos/hero-bg.mp4" />
-        <div className="video-section-content">
-          <span className="hero-eyebrow"><span className="dot" aria-hidden="true" /> Tech Jobs & Internships</span>
-          <h1>
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
-            >
-              Find Verified Tech Jobs
-            </motion.span>
-            <motion.span
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.35, ease: "easeOut" }}
-            >
-              Internships & <span className="accent">Career Guides</span>
-            </motion.span>
-          </h1>
-          <p style={{color:"var(--color-text-secondary)"}}>
-            Fresh IT & software job updates, internships, and remote-friendly roles for freshers and
-            experienced tech talent — all in one place.
-          </p>
-          <a href="#jobs" className="btn btn-primary">Browse Jobs here</a>
-        </div>
-      </motion.section>
+      <JsonLd data={ORG_SCHEMA} />
+      <JsonLd data={WEBSITE_SCHEMA} />
+      <link rel="preload" as="image" type="image/webp" imageSrcSet={HERO_IMAGE.srcSet} imageSizes={HERO_IMAGE.sizes} media="(min-width: 900px)" fetchPriority="high" />
 
-      <motion.section
-        className="editorial-spotlight"
-        initial={{ opacity: 0, y: 18 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="section-heading editorial-heading">
-          <span className="hero-eyebrow"><span className="dot" aria-hidden="true" /> Why jobkhojoAI exists</span>
-          <h2>Original career guidance, verified jobs, and hiring insights.</h2>
-          <p>We help candidates discover roles, learn the market, avoid fake opportunities, and build stronger applications with practical guidance instead of generic job board noise.</p>
-        </div>
+      <section className="home-hero">
+        <div className="container home-hero-grid">
+          <div className="home-hero-copy">
+            <h1>Find your next <span>job or internship.</span></h1>
+            <p className="home-hero-lead">
+              Fresh opportunities in software, design, data and more — with clear information and direct links to apply at the source.
+            </p>
 
-        <div className="stats-grid" aria-label="Site quality metrics">
-          <div className="stat-card card">
-            <strong>Verified tech roles</strong>
-            <span>Updated job listings and tracked hiring opportunities for modern tech careers.</span>
-          </div>
-          <div className="stat-card card">
-            <strong>Career roadmaps</strong>
-            <span>Step-by-step learning paths for frontend, backend, data, and product roles.</span>
-          </div>
-          <div className="stat-card card">
-            <strong>Original guidance</strong>
-            <span>Practical advice on resumes, internships, interviews, and scam detection.</span>
-          </div>
-          <div className="stat-card card">
-            <strong>Trust-first content</strong>
-            <span>Clear editorial and verification policies built around user trust and quality.</span>
-          </div>
-        </div>
+            <Form method="get" action="/jobs" className="hero-search" role="search" aria-label="Search jobs">
+              <label className="hero-search-field">
+                <Search size={18} aria-hidden="true" />
+                <span className="sr-only">Job title, skill or company</span>
+                <input name="q" type="search" placeholder="Job title, skill or company" autoComplete="off" />
+              </label>
+              <div className="hero-search-row">
+                <label className="hero-search-field">
+                  <MapPin size={18} aria-hidden="true" />
+                  <span className="sr-only">Location</span>
+                  <input name="location" type="text" placeholder="City or remote" autoComplete="off" />
+                </label>
+                <button type="submit" className="btn btn-primary btn-lg">Search jobs <ArrowRight size={18} aria-hidden="true" /></button>
+              </div>
+            </Form>
 
-        <div className="feature-grid">
-          <div className="card feature-card">
-            <span className="feature-tag">For freshers</span>
-            <h3>Learn what employers actually value</h3>
-            <p>From resume structure to internship strategy, our guides explain how to improve your application quality and improve recruiter response.</p>
-            <Link to="/career-insights" className="inline-link">Explore career insights →</Link>
+            <ul className="hero-assurances">
+              <li><CircleCheck size={20} aria-hidden="true" className="ico-success" /> Fresh listings</li>
+              <li><Link2 size={20} aria-hidden="true" className="ico-brand" /> Direct application links</li>
+              <li><ShieldCheck size={20} aria-hidden="true" className="ico-teal" /> No registration required</li>
+            </ul>
           </div>
-          <div className="card feature-card">
-            <span className="feature-tag">For professionals</span>
-            <h3>Upgrade your job search and interview prep</h3>
-            <p>Get stronger advice around remote hiring, portfolio-building, salary expectations, and interview preparation for real-world roles.</p>
-            <Link to="/career-guide/react-developer-interview-preparation" className="inline-link">Read interview prep →</Link>
-          </div>
-          <div className="card feature-card">
-            <span className="feature-tag">For everyone</span>
-            <h3>Protect yourself from low-quality or fake listings</h3>
-            <p>Our content includes practical checks for fake recruiters, vague job posts, and suspicious hiring practices before you share personal information.</p>
-            <Link to="/career-guide/how-to-spot-fake-job-posts" className="inline-link">Learn the warning signs →</Link>
-          </div>
-        </div>
-      </motion.section>
 
-      <motion.section
-        className="original-guides"
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="section-heading">
-          <h2>Original guidance for smarter applications and better career decisions</h2>
-          <p>Our editorial content is built to answer genuine job-search questions: how to write a better resume, avoid fake hiring traps, prepare for interviews, and choose a realistic career path.</p>
+          <picture className="home-hero-art">
+            <source media="(min-width: 900px)" srcSet={HERO_IMAGE.srcSet} sizes={HERO_IMAGE.sizes} type="image/webp" />
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt=""
+              width="600"
+              height="361"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
         </div>
+      </section>
 
-        <div className="mini-guide-grid">
-          <Link to="/career-guide/resume-guide-for-it-freshers" className="card mini-guide-card">
-            <span className="guide-kicker">Resume</span>
-            <strong>Resume Guide for IT Freshers</strong>
-          </Link>
-          <Link to="/career-guide/internship-application-guide" className="card mini-guide-card">
-            <span className="guide-kicker">Internships</span>
-            <strong>Internship Application Guide</strong>
-          </Link>
-          <Link to="/career-guide/how-to-spot-fake-job-posts" className="card mini-guide-card">
-            <span className="guide-kicker">Scams</span>
-            <strong>How to Spot Fake Job Posts</strong>
-          </Link>
-          <Link to="/career-guide/salary-guide-for-indian-software-developers" className="card mini-guide-card">
-            <span className="guide-kicker">Salary</span>
-            <strong>Salary Guide for Indian Developers</strong>
-          </Link>
-          <Link to="/career-guide/github-portfolio-guide-for-freshers" className="card mini-guide-card">
-            <span className="guide-kicker">Portfolio</span>
-            <strong>GitHub Portfolio Guide for Freshers</strong>
-          </Link>
-          <Link to="/career-guide/javascript-interview-questions-with-explanations" className="card mini-guide-card">
-            <span className="guide-kicker">Interview</span>
-            <strong>JavaScript Interview Questions</strong>
-          </Link>
-        </div>
-      </motion.section>
-
-      <motion.section
-        className="trust-band"
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-40px" }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="section-heading">
-          <h2>Our quality-first approach</h2>
-          <p>We focus on useful job discovery, practical career advice, and transparent editorial standards instead of producing low-value pages designed only for click-through traffic.</p>
-        </div>
-
-        <div className="policy-grid">
-          <div className="card policy-card">
-            <strong>Verified hiring focus</strong>
-            <p>Our job listings are organized around real hiring intent and user value, not keyword-heavy page duplication.</p>
-          </div>
-          <div className="card policy-card">
-            <strong>Editorial clarity</strong>
-            <p>Career stories, roadmaps, and guides are created to answer specific user questions with clear practical takeaways.</p>
-          </div>
-          <div className="card policy-card">
-            <strong>Trust and transparency</strong>
-            <p>We publish information about our policies, corrections, and editorial standards to support long-term reader trust.</p>
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section
-        id="roadmaps"
-        style={{marginBottom:"var(--space-12)", scrollMarginTop:90}}
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-80px" }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-      >
-        <div className="section-heading">
-          <h2>Career Roadmaps, Interview Prep &amp; Hiring Guides</h2>
-          <p>Choose a career path, follow a learning roadmap, and read original articles that help job seekers improve application quality and interview readiness.</p>
-        </div>
-
-        <div className="roadmap-grid-block" style={{ marginBottom: 24 }}>
-          <div className="roadmap-grid-badge-row">
-            <span className="roadmap-grid-badge">Original Articles</span>
-          </div>
-          <p className="roadmap-grid-subtitle" style={{ marginTop: 12, marginBottom: 18 }}>
-            Practical career advice for job seekers, freshers, and hiring-ready professionals.
-          </p>
-          <div className="roadmap-card-grid">
-            {[
-              { slug: "frontend-developer-roadmap-2026", label: "Frontend Developer Roadmap 2026" },
-              { slug: "react-developer-interview-preparation", label: "React Interview Prep" },
-              { slug: "how-to-spot-fake-job-posts", label: "How to Spot Fake Job Posts" },
-            ].map(item => (
-              <Link key={item.slug} to={`/career-guide/${item.slug}`} className="roadmap-card" style={{ opacity: 1, transform: "none" }}>
-                <span>{item.label}</span>
-                <RoadmapCardIcon />
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <RoadmapGridBlock
-          badge="Role-based Roadmaps"
-          subtitle="Tap a role to see its full career roadmap."
-          items={ROADMAP_CATEGORIES}
-          hrefFor={r => `/roadmap/${r.slug}`}
-        />
-        {PUBLISHED_SKILL_ROADMAPS.length > 0 && (
-          <RoadmapGridBlock
-            badge="Skill-based Roadmaps"
-            subtitle="Going deep on one skill? Start here."
-            items={PUBLISHED_SKILL_ROADMAPS}
-            hrefFor={s => `/skill-roadmap/${s.slug}`}
+      <section className="home-section" aria-labelledby="latest-heading">
+        <div className="container">
+          <SectionHead
+            id="latest-heading"
+            title="Latest opportunities"
+            subtitle="Recently added jobs and internships. Every listing links to the original application page."
+            link={{ to: "/jobs", label: `View all ${total} jobs` }}
           />
-        )}
-        <RoadmapGridBlock
-          badge="Project Ideas"
-          subtitle="Real build ideas, pulled straight from each roadmap."
-          items={PROJECT_CATEGORIES}
-          hrefFor={p => `/roadmap/${p.slug}#${p.anchor}`}
-        />
-      </motion.section>
+          <div className="job-tile-grid">
+            {latest.map(job => <JobTile key={job._id} job={job} />)}
+          </div>
+        </div>
+      </section>
 
-      <div id="jobs">
-        <motion.div
-          className="section-heading"
-          style={{textAlign:"left", margin:"0 0 24px"}}
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-        >
-          <h2 style={{margin:0}}>Latest Tech Jobs</h2>
-        </motion.div>
+      {browse.length > 0 && (
+        <section className="home-section home-band" aria-labelledby="browse-heading">
+          <div className="container">
+            <SectionHead
+              id="browse-heading"
+              title="Browse jobs"
+              subtitle="Find opportunities that match where you are right now."
+              link={{ to: "/jobs", label: "All jobs" }}
+            />
+            <ul className="link-card-grid">
+              {browse.map(t => {
+                const Icon = BROWSE_ICONS[t.key];
+                return (
+                  <li key={t.key}>
+                    <Link to={t.to} className="link-card">
+                      <span className={`link-card-icon tone-${t.key}`}><Icon size={20} aria-hidden="true" /></span>
+                      <span className="link-card-text">
+                        <span className="link-card-title">{t.label}</span>
+                        <span className="link-card-meta">{t.n} {t.n === 1 ? "job" : "jobs"}</span>
+                      </span>
+                      <ChevronRight size={18} aria-hidden="true" className="link-card-chevron" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+      )}
 
-        <motion.section
-          className="filter-bar"
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{marginBottom:24}}
-        >
-          <input
-            type="search"
-            aria-label="Search jobs"
-            placeholder="Search by title, skill, or company"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+      <section className="home-section" aria-labelledby="how-heading">
+        <div className="container">
+          <SectionHead id="how-heading" title="How JobKhojo works" subtitle="Simple, transparent and safe — here's exactly what we do with every listing." />
+          <ol className="how-steps">
+            <li>
+              <span className="how-num" aria-hidden="true">1</span>
+              <div>
+                <Search size={26} aria-hidden="true" className="how-icon" />
+                <h3>We find openings</h3>
+                <p>We collect openings from company career pages and public job boards, focusing on roles for freshers and early-career candidates.</p>
+              </div>
+            </li>
+            <li>
+              <span className="how-num" aria-hidden="true">2</span>
+              <div>
+                <FileText size={26} aria-hidden="true" className="how-icon" />
+                <h3>We write them up</h3>
+                <p>Each listing is added by hand with the role, requirements, location and experience in one consistent format.</p>
+              </div>
+            </li>
+            <li>
+              <span className="how-num" aria-hidden="true">3</span>
+              <div>
+                <SquareArrowOutUpRight size={26} aria-hidden="true" className="how-icon" />
+                <h3>You apply at the source</h3>
+                <p>We link you straight to the employer or job board's application page. We never collect applications or charge candidates.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section className="home-section home-section-tight" aria-labelledby="paths-heading">
+        <div className="container">
+          <SectionHead
+            id="paths-heading"
+            title="Explore career paths"
+            subtitle="Step-by-step guides to learn in-demand skills and build real projects."
+            link={{ to: "/career-paths", label: "View all career paths" }}
           />
-          <div role="group" aria-label="Filter jobs by category" className="filter-pills">
-            {["All","Full-time","Part-time","Internship"].map(c => (
-              <motion.button
-                key={c}
-                type="button"
-                aria-pressed={c === category}
-                className={c === category ? "btn btn-primary" : "btn btn-ghost"}
-                onClick={() => setCategory(c)}
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-              >
-                {c}
-              </motion.button>
-            ))}
-            <motion.button
-              type="button"
-              aria-pressed={remoteOnly}
-              className={remoteOnly ? "btn btn-primary" : "btn btn-ghost"}
-              onClick={() => setRemoteOnly(r => !r)}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-            >
-              Remote only
-            </motion.button>
-          </div>
-        </motion.section>
+          <ul className="link-card-grid">
+            {paths.map((p, i) => {
+              const Icon = PATH_ICONS[p.slug] || Code2;
+              return (
+                <li key={p.slug}>
+                  <Link to={`/roadmap/${p.slug}`} className="link-card">
+                    <span className={`link-card-icon ${i % 2 ? "tone-teal" : "tone-blue"}`}><Icon size={20} aria-hidden="true" /></span>
+                    <span className="link-card-text">
+                      <span className="link-card-title">{p.title}</span>
+                      <span className="link-card-meta">{p.steps} steps</span>
+                    </span>
+                    <ChevronRight size={18} aria-hidden="true" className="link-card-chevron" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
 
-        {companyFilter && (
-          <div className="active-filter-chip">
-            Showing jobs at <strong>{companyFilter}</strong>
-            <button type="button" onClick={() => setCompanyFilter("")} aria-label={`Clear ${companyFilter} filter`}>×</button>
-          </div>
-        )}
+      <section className="home-section home-section-tight" aria-labelledby="guides-heading">
+        <div className="container">
+          <SectionHead
+            id="guides-heading"
+            title="Career guides"
+            subtitle="Practical advice on resumes, internships, interviews and staying safe while job hunting."
+            link={{ to: "/career-insights", label: "View all guides" }}
+          />
+          <ul className="guide-media-grid">
+            {guides.map(g => {
+              const meta = guideMeta(g.slug);
+              return (
+                <li key={g.slug}>
+                  <article className="guide-media-card">
+                    {meta.image && (
+                      <img src={meta.image.src} srcSet={meta.image.srcSet} sizes="150px" alt="" width="150" height="112" loading="lazy" decoding="async" />
+                    )}
+                    <div className="guide-media-body">
+                      <span className="topic-tag">{meta.topic}</span>
+                      <h3><Link to={`/career-guide/${g.slug}`} className="stretched-link">{g.title}</Link></h3>
+                      <p>{g.summary}</p>
+                      <span className="guide-media-meta">{g.minutes} min read</span>
+                    </div>
+                  </article>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
 
-        {country && (
-          <div className="active-filter-chip">
-            Showing <strong>{country}</strong> jobs (incl. remote)
-            <button type="button" onClick={() => setCountry("")} aria-label={`Clear ${country} filter`}>×</button>
-          </div>
-        )}
-
-        {loading && <SkeletonCards count={6} />}
-        {error && <p style={{color:"var(--color-danger)"}} role="alert">{error}</p>}
-        {!loading && !error && visibleJobs.length === 0 && (
-          <motion.div className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-              <path d="M4 7.5 12 12m0 0 8-4.5M12 12v9" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-            </svg>
-            <div>
-              <strong style={{color:"var(--color-text-secondary)", display:"block", marginBottom:4}}>No jobs match this filter yet</strong>
-              Try a different category, or check back soon — new listings go up daily.
+      <section className="home-section home-section-last" aria-labelledby="safe-heading">
+        <div className="container">
+          <div className="safety-band">
+            <ShieldCheck size={44} aria-hidden="true" className="safety-band-icon" />
+            <div className="safety-band-text">
+              <h2 id="safe-heading">Your job search should be simple and safe.</h2>
+              <p>JobKhojo doesn't charge candidates for anything. We link you to the original source and review listings to help you avoid suspicious posts.</p>
             </div>
-          </motion.div>
-        )}
-
-        {visibleJobs.length > 0 && (
-          <div style={{marginBottom:40}}>
-            <JobSlider jobs={visibleJobs} />
+            <Link to="/job-verification-policy" className="btn btn-secondary btn-brand-outline">
+              Learn how we review listings <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
-        )}
-      </div>
-
-      <FeaturedCompanies />
-
-      <JobShelf
-        title="Remote Jobs"
-        subtitle="Fully remote tech roles you can do from anywhere."
-        params={{ remote: "true" }}
-        viewAllHref="/?remote=true#jobs"
-      />
-
-      <JobShelf
-        title="Latest Internships"
-        subtitle="Kickstart your tech career with these internship openings."
-        params={{ category: "Internship" }}
-        viewAllHref="/?category=Internship#jobs"
-      />
-
-      <FAQSection />
+        </div>
+      </section>
     </main>
   );
 }

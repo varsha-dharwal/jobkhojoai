@@ -1,5 +1,6 @@
+import ProtectedRoute from "../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import api from "../../api/client";
 
 const empty = {
@@ -39,7 +40,7 @@ function FormSection({ title, subtitle, children }){
   );
 }
 
-export default function AdminJobForm(){
+function AdminJobFormPage(){
   const { id } = useParams();
   const isEdit = Boolean(id);
   const [form, setForm] = useState(empty);
@@ -217,4 +218,8 @@ export default function AdminJobForm(){
       </form>
     </main>
   );
+}
+
+export default function AdminJobForm(){
+  return <ProtectedRoute><AdminJobFormPage /></ProtectedRoute>;
 }

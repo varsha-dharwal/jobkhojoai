@@ -1,20 +1,24 @@
 https://jobkhojoai.pages.dev/*
   X-Robots-Tag: noindex
 
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/videos/*
-  Cache-Control: public, max-age=604800
+/*.data
+  Cache-Control: public, max-age=0, must-revalidate
 
 /*.svg
+  Cache-Control: public, max-age=604800
+
+/og-image.png
   Cache-Control: public, max-age=604800
 
 /sitemap.xml
   Cache-Control: public, max-age=3600
 
-/
-  Cache-Control: public, max-age=0, must-revalidate
-
-/index.html
-  Cache-Control: public, max-age=0, must-revalidate
+/admin/*
+  X-Robots-Tag: noindex

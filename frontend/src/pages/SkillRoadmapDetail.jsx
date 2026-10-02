@@ -1,68 +1,39 @@
-import { useEffect } from "react";
-import { useParams, useLocation, Link, Navigate } from "react-router-dom";
-import { motion } from "motion/react";
+import { Link, useParams } from "react-router";
 import JourneyRoadmap from "../components/JourneyRoadmap";
 import SEO from "../components/SEO";
+import NotFound from "./NotFound";
 import { SKILL_ROADMAP_CATEGORIES, SKILL_ROADMAPS } from "../data/skillRoadmaps";
 
 export default function SkillRoadmapDetail(){
   const { slug } = useParams();
-  const { hash } = useLocation();
   const meta = SKILL_ROADMAP_CATEGORIES.find(s => s.slug === slug);
   const roadmap = SKILL_ROADMAPS[slug];
 
-  useEffect(() => {
-    if (!hash) return;
-    const el = document.getElementById(hash.slice(1));
-    if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth" }));
-  }, [hash, slug]);
-
-  if (!meta) return <Navigate to="/" replace />;
+  if (!meta) return <NotFound />;
+  const ready = Boolean(roadmap?.steps?.length);
 
   return (
-    <main className="container" style={{paddingTop:32, paddingBottom:60}}>
+    <main className="container doc-page">
       <SEO
-        title={`${meta.label} Roadmap | jobkhojoAI`}
-        description={roadmap?.tagline || `Step-by-step ${meta.label} learning roadmap — coming soon on jobkhojoAI.`}
+        title={`${meta.label} Learning Path | JobKhojo`}
+        description={roadmap?.tagline || `A step-by-step ${meta.label} learning path is coming soon on JobKhojo.`}
         path={`/skill-roadmap/${slug}`}
-        noindex={!roadmap?.steps?.length}
+        noindex={!ready}
       />
-
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        style={{maxWidth:640, marginBottom: roadmap ? 56 : 40}}
-      >
-        <span className="hero-eyebrow"><span className="dot" aria-hidden="true" /> Skill Roadmap</span>
-        <h1 style={{fontSize:"clamp(28px, 5vw, 44px)", margin:"16px 0 12px", lineHeight:1.15}}>{meta.label}</h1>
-        {roadmap && (
-          <p style={{color:"var(--color-text-secondary)", fontSize:16, lineHeight:1.7, margin:0}}>{roadmap.tagline}</p>
-        )}
-      </motion.div>
-
-      {roadmap ? (
-        <div style={{marginBottom:72}}>
-          <JourneyRoadmap steps={roadmap.steps} />
-        </div>
+      <header className="doc-head">
+        <p className="eyebrow eyebrow-teal">Skill path</p>
+        <h1>{meta.label}</h1>
+        {roadmap?.tagline && <p className="lead">{roadmap.tagline}</p>}
+      </header>
+      {ready ? (
+        <JourneyRoadmap steps={roadmap.steps} />
       ) : (
-        <motion.div
-          className="card"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          style={{padding:32, marginBottom:48, textAlign:"center"}}
-        >
-          <p style={{color:"var(--color-text-secondary)", fontSize:16, lineHeight:1.7, margin:"0 0 20px"}}>
-            We're building a full step-by-step {meta.label} roadmap — check back soon.
-          </p>
-          <Link to="/#roadmaps" className="btn btn-ghost">Browse Role Roadmaps Instead</Link>
-        </motion.div>
+        <div className="empty-state">
+          <h2>This skill path is being written</h2>
+          <p>In the meantime, the role-based career paths cover {meta.label} in context.</p>
+          <Link to="/career-paths" className="btn btn-secondary">Browse career paths</Link>
+        </div>
       )}
-
-      <div style={{textAlign:"center"}}>
-        <Link to="/#jobs" className="btn btn-primary">Browse Matching Jobs</Link>
-      </div>
     </main>
   );
 }

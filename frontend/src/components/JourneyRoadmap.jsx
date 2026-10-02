@@ -1,77 +1,27 @@
-import { motion } from "motion/react";
 import { slugify } from "../utils/slugify";
 
-// Flowchart-style roadmap: a center spine with each step as a highlighted node sitting
-// on it, connected by a dashed branch line to a card of that step's topics/items —
-// alternating left/right per step, echoing roadmap.sh's diagram shape in our own theme.
-// All content comes straight from the steps prop (data/roadmaps.js) — nothing added.
-function BranchCard({ step, align }){
-  if (!step.topics?.length) return null;
-  return (
-    <motion.div
-      className="flow-branch"
-      initial={{ opacity: 0, x: align === "left" ? 16 : -16 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
-      {step.topics.map(group => (
-        <div className="flow-branch-card" key={group.subject}>
-          <span className="flow-branch-label">{group.subject}</span>
-          <div className="flow-branch-items">
-            {group.items.map(item => (
-              <span className="flow-branch-item" key={item}>{item}</span>
-            ))}
-          </div>
-        </div>
-      ))}
-    </motion.div>
-  );
-}
-
+// Vertical, numbered career path: each step lists the topics to learn in that stage.
+// All content comes straight from the steps prop (data/roadmaps.js).
 export default function JourneyRoadmap({ steps }){
   return (
-    <div className="flow-track">
-      {steps.map((step, i) => {
-        const branchOnRight = i % 2 === 0;
-        return (
-          <div className="flow-row" id={slugify(step.title)} style={{scrollMarginTop:96}} key={step.title}>
-            <div className="flow-slot flow-slot-left">
-              {!branchOnRight && (
-                <>
-                  <BranchCard step={step} align="left" />
-                  <span className="flow-connector" aria-hidden="true" />
-                </>
-              )}
-            </div>
-
-            <div className="flow-slot flow-slot-node">
-              <motion.div
-                className="flow-node"
-                initial={{ opacity: 0, scale: 0.92 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.35, ease: "easeOut" }}
-              >
-                <span className="flow-node-num" aria-hidden="true">{i + 1}</span>
-                <span>
-                  <span className="flow-node-title">{step.title}</span>
-                  {step.description && <span className="flow-node-desc">{step.description}</span>}
-                </span>
-              </motion.div>
-            </div>
-
-            <div className="flow-slot flow-slot-right">
-              {branchOnRight && (
-                <>
-                  <span className="flow-connector" aria-hidden="true" />
-                  <BranchCard step={step} align="right" />
-                </>
-              )}
-            </div>
+    <ol className="path-steps">
+      {steps.map((step, i) => (
+        <li key={step.title} id={slugify(step.title)} className="path-step">
+          <span className="path-step-num" aria-hidden="true">{i + 1}</span>
+          <div className="path-step-body">
+            <h3>{step.title}</h3>
+            {step.description && <p className="path-step-desc">{step.description}</p>}
+            {step.topics?.map(group => (
+              <div key={group.subject} className="path-step-topics">
+                {step.topics.length > 1 && <p className="path-step-subject">{group.subject}</p>}
+                <ul className="chip-list">
+                  {group.items.map(item => <li key={item} className="chip chip-quiet">{item}</li>)}
+                </ul>
+              </div>
+            ))}
           </div>
-        );
-      })}
-    </div>
+        </li>
+      ))}
+    </ol>
   );
 }

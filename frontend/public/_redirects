@@ -1,1 +1,5 @@
-/*    /index.html   200
+# Every public page is a pre-rendered static file. Unknown URLs get the nearest
+# 404.html: jobs/, admin/ and skill-roadmap/ each have one that boots the app in the
+# browser (so jobs posted after the last build still open), everything else gets the
+# site-wide static 404 page.
+/admin    /admin/jobs    302

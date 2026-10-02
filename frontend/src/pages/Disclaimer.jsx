@@ -1,18 +1,52 @@
 import TrustPage from "./TrustPage";
 
+const sections = [
+  {
+    id: "information",
+    heading: "Information only",
+    paragraphs: [
+      "JobKhojo presents publicly available job and internship openings, along with career guidance, for general information. We are not a recruiter, staffing agency or employer, and we don't take part in any hiring process.",
+    ],
+  },
+  {
+    id: "accuracy",
+    heading: "Check the original posting",
+    paragraphs: [
+      "We take care when writing up listings, but employers can change or close openings at any time. Before applying, sharing personal details or making any commitment, confirm the role, eligibility, salary and deadline on the employer's official website or the original job board.",
+    ],
+  },
+  {
+    id: "outcomes",
+    heading: "No guarantees",
+    paragraphs: [
+      "We can't guarantee interviews, job offers, salaries or any other outcome. Salary figures, where shown, are as published by the employer or source and may not reflect a final offer.",
+    ],
+  },
+  {
+    id: "fees",
+    heading: "We never charge candidates",
+    paragraphs: [
+      "JobKhojo never asks for money. If someone asks you to pay for a job, an interview, training or an offer letter in JobKhojo's name, it is a scam — please report it to us.",
+    ],
+  },
+  {
+    id: "external",
+    heading: "External links and ads",
+    paragraphs: [
+      "Job pages link to third-party websites we don't control. Ads shown on JobKhojo are provided by Google AdSense; an ad appearing here is not an endorsement.",
+    ],
+  },
+];
+
 export default function Disclaimer() {
   return (
     <TrustPage
-      title="Disclaimer | jobkhojoAI"
-      description="Read the disclaimer for jobkhojoAI. We provide job information for informational purposes and do not guarantee employment or application outcomes."
+      title="Disclaimer | JobKhojo"
+      description="JobKhojo provides job information for general guidance. Confirm details with the employer before applying. We never charge candidates."
       path="/disclaimer"
+      eyebrow="Legal"
       heading="Disclaimer"
-      paragraphs={[
-        "jobkhojoAI is an informational career platform. It collects and presents publicly available job listings, internship opportunities, and education content for convenience and awareness.",
-        "We do not guarantee hiring, employment, salary, or interview outcomes. Every job or internship must be verified with the official employer, company careers portal, or trusted hiring channel before a candidate proceeds.",
-        "Where a listing appears inconsistent, expired, or incomplete, jobkhojoAI may update or remove it after review. Users are responsible for checking the official source before applying, sharing personal details, or making commitments.",
-        "We are not a recruiter, staffing agency, or employer. We do not directly hire candidates or manage employer onboarding processes."
-      ]}
+      sections={sections}
     />
   );
 }

@@ -37,33 +37,44 @@ Server runs on http://localhost:5000
 cd frontend
 npm install
 cp .env.example .env
-npm run dev
+npm run dev       # http://localhost:5173
+npm run build     # pre-renders every public page into build/client
+npm run preview   # serves build/client the way Cloudflare Pages does (http://localhost:8788)
 ```
-Site runs on http://localhost:5173
+
+Don't keep a `frontend/.env` pointing at localhost when you build for production — the API URL is baked
+into the build. Without one, builds use the live Render API.
+
+### How the frontend works
+
+React Router in framework mode with **pre-rendering** (`frontend/react-router.config.js`). At build time every
+public page — homepage, `/jobs`, every `/jobs/:slug`, career paths, guides and policy pages — is rendered to
+static HTML from live API data. Visitors and search/AdSense crawlers get the full page instantly, even while
+the free backend is asleep.
+
+- A job posted after the last build still opens: `jobs/404.html` boots the app and loads it from the API.
+  It gets its own static page on the next build.
+- `scripts/postbuild.js` writes clean URLs (`about.html` is served at `/about`), the static `404.html` and
+  `sitemap.xml`.
+- A production build fails if the API can't be reached, so a deploy never ships without jobs.
 
 ## 3. Posting a job (no coding)
 
 1. Go to `yoursite.com/admin/login`, log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` from your `.env`
 2. Click **+ Add Job**, fill the form, click **Publish Job**
-3. It instantly appears on the homepage — that's the link you share on Instagram
+3. The job link works immediately. It joins the jobs list and gets a pre-rendered page at the next deploy
+   (automatic every morning — see below).
 
-## 4. Deploying (when ready)
+## 4. Deploying
 
-- **Frontend** → Vercel (connect the `frontend` folder as the project root, set `VITE_API_URL` to your live backend URL)
-- **Backend** → Render or Railway (connect the `backend` folder, add the same env vars as your local `.env`, set `CLIENT_URL` to your live frontend URL)
-- **Database** → MongoDB Atlas (free tier is enough for MVP)
-- Point `jobkhojoai.com` at the Vercel deployment (Vercel gives you the DNS records to add)
+- **Frontend** → Cloudflare Pages. `.github/workflows/deploy-frontend.yml` builds and deploys on every push to
+  `main`, every day at 07:00 IST, and on demand (GitHub → Actions → Deploy frontend → Run workflow).
+  One-time setup: add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+  Manual alternative: `cd frontend && npm run deploy`.
+- **Backend** → Render (free plan). `.github/workflows/keep-backend-awake.yml` pings it every 10 minutes so it
+  doesn't fall asleep.
+- **Database** → MongoDB Atlas (free tier).
 
-## What's already built in
+## Notes
 
-- JobPosting structured data (JSON-LD) on every job page — helps jobs show up in Google's "Jobs" search feature
-- Auto-hide expired jobs from the public homepage (mark a job "Expired" in the admin panel)
-- Govt vs Private badges, search, and category filter on the homepage
-- Privacy Policy / Terms / About / Contact pages already in place (needed for AdSense review later)
-- Dark theme using your design tokens, brand teal (#00c48c) matching the jobkhojoAI logo
-
-## What's still manual / next steps
-
-- The 600-word SEO homepage paragraph, FAQ section, sitemap.xml, robots.txt, and Google Analytics — add these
-  once the site is live on a real domain (they need a real URL to be useful)
 - No password-reset flow for admin — if you forget it, update `ADMIN_PASSWORD` in `.env` directly and redeploy

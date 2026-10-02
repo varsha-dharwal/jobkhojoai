@@ -1,8 +1,9 @@
+import ProtectedRoute from "../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import api from "../../api/client";
 
-export default function AdminJobs(){
+function AdminJobsPage(){
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState("");
@@ -70,4 +71,8 @@ export default function AdminJobs(){
       {!loading && jobs.length === 0 && <p style={{color:"var(--color-text-tertiary)"}}>No jobs have been added yet.</p>}
     </main>
   );
+}
+
+export default function AdminJobs(){
+  return <ProtectedRoute><AdminJobsPage /></ProtectedRoute>;
 }

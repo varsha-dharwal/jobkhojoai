@@ -1,36 +1,37 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
+import { Bookmark } from "lucide-react";
 import JobCard from "../components/JobCard";
 import SEO from "../components/SEO";
 import { getSavedJobs, onSavedJobsChange } from "../utils/savedJobs";
 
 export default function SavedJobs(){
-  const [jobs, setJobs] = useState(getSavedJobs());
+  const [jobs, setJobs] = useState(null);
 
-  useEffect(() => onSavedJobsChange(() => setJobs(getSavedJobs())), []);
+  useEffect(() => {
+    setJobs(getSavedJobs());
+    return onSavedJobsChange(() => setJobs(getSavedJobs()));
+  }, []);
 
   return (
-    <main className="container" style={{paddingTop:32, paddingBottom:60}}>
-      <SEO title="Saved Jobs | jobkhojoAI" description="Jobs you've saved on jobkhojoAI." path="/saved-jobs" noindex />
-      <div className="section-heading" style={{textAlign:"left", margin:"0 0 24px"}}>
-        <h2 style={{margin:0}}>Saved Jobs</h2>
-        <p>Jobs you've bookmarked, saved on this device.</p>
-      </div>
+    <main className="container doc-page doc-page-wide">
+      <SEO title="Saved jobs | JobKhojo" description="Jobs you've saved on JobKhojo." path="/saved-jobs" noindex />
+      <header className="doc-head">
+        <h1>Saved jobs</h1>
+        <p className="lead">Saved on this device. Listings may close — open a job to check it's still available.</p>
+      </header>
 
-      {jobs.length === 0 ? (
+      {jobs && jobs.length === 0 && (
         <div className="empty-state">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-          </svg>
-          <div>
-            <strong style={{color:"var(--color-text-secondary)", display:"block", marginBottom:4}}>No saved jobs yet</strong>
-            Tap "Save Job" on any listing to bookmark it for later.
-          </div>
-          <Link to="/" className="btn btn-primary" style={{marginTop:16}}>Browse Jobs</Link>
+          <Bookmark size={28} aria-hidden="true" />
+          <h2>No saved jobs yet</h2>
+          <p>Use the bookmark on any job to keep it here for later.</p>
+          <Link to="/jobs" className="btn btn-primary">Browse jobs</Link>
         </div>
-      ) : (
-        <div className="jobs-grid">
-          {jobs.map((job, i) => <JobCard key={job._id} job={job} index={i} />)}
+      )}
+      {jobs && jobs.length > 0 && (
+        <div className="job-list">
+          {jobs.map(job => <JobCard key={job._id} job={job} headingLevel={2} />)}
         </div>
       )}
     </main>
