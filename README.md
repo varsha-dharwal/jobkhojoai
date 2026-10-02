@@ -67,9 +67,12 @@ the free backend is asleep.
 
 ## 4. Deploying
 
-- **Frontend** → Cloudflare Pages. `.github/workflows/deploy-frontend.yml` builds and deploys on every push to
-  `main`, every day at 07:00 IST, and on demand (GitHub → Actions → Deploy frontend → Run workflow).
-  One-time setup: add repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+- **Frontend** → Cloudflare Pages, connected to this repo: every push to `main` deploys, and pull requests
+  get a preview URL. Build settings: root directory `frontend`, build command `npm run build`, output
+  directory `build/client` (Node version comes from `frontend/.nvmrc`).
+  `.github/workflows/deploy-frontend.yml` also rebuilds every day at 07:00 IST and on demand (GitHub →
+  Actions → Deploy frontend → Run workflow), so new jobs get their pre-rendered page. It needs repository
+  secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
   Manual alternative: `cd frontend && npm run deploy`.
 - **Backend** → Render (free plan). `.github/workflows/keep-backend-awake.yml` pings it every 10 minutes so it
   doesn't fall asleep.
