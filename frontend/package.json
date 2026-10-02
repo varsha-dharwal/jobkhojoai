@@ -4,26 +4,26 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "react-router dev",
+    "build": "react-router build && node scripts/postbuild.js",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "sitemap": "node scripts/generate-sitemap.js",
-    "deploy": "npm run sitemap && vite build && wrangler pages deploy dist --project-name=jobkhojoai"
+    "preview": "wrangler pages dev build/client",
+    "deploy": "npm run build && wrangler pages deploy build/client --project-name=jobkhojoai"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.9.0",
+    "@react-router/node": "^7.18.4",
     "axios": "^1.19.0",
+    "isbot": "^5.2.2",
     "lucide-react": "^1.39.0",
-    "motion": "^13.1.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react-router": "^7.18.4"
   },
   "devDependencies": {
+    "@react-router/dev": "^7.18.4",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
     "oxlint": "^1.75.0",
     "vite": "^8.2.0",
     "wrangler": "^4.124.0"

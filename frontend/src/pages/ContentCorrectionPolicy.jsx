@@ -1,18 +1,39 @@
 import TrustPage from "./TrustPage";
+import { CONTACT_EMAIL } from "../lib/site";
+
+const sections = [
+  {
+    id: "report",
+    heading: "How to report a problem",
+    paragraphs: [
+      `Email ${CONTACT_EMAIL} or message us on Instagram with the page link and what looks wrong — for example an incorrect title or salary, an expired opening, a broken apply link, a typo, or advice that's out of date.`,
+    ],
+  },
+  {
+    id: "listings",
+    heading: "Corrections to job listings",
+    paragraphs: [
+      "We compare the report with the original posting. If the original confirms the change, we update the listing. If the opening has closed or can't be confirmed, we take the listing down.",
+    ],
+  },
+  {
+    id: "guides",
+    heading: "Corrections to guides and career paths",
+    paragraphs: [
+      "Factual mistakes are fixed as soon as we confirm them. When a change is significant, we update the page's date. We also revise or remove content that has become outdated or isn't useful.",
+    ],
+  },
+];
 
 export default function ContentCorrectionPolicy() {
   return (
     <TrustPage
-      title="Content Correction Policy | jobkhojoAI"
-      description="Learn how jobkhojoAI reviews content corrections, updates expired listings, and fixes editorial or job detail issues."
+      title="Content Correction Policy | JobKhojo"
+      description="How to report an error on JobKhojo and how we correct job listings, guides and career paths."
       path="/content-correction-policy"
-      heading="Content Correction Policy"
-      paragraphs={[
-        "jobkhojoAI aims to keep job and career information accurate and helpful. If a user notices a wrong title, incorrect salary range, expired link, outdated deadline, or a typo, they can contact us through the Contact page.",
-        "We review correction requests promptly and update listings when the official source confirms the change. If the information cannot be verified, we may leave the listing unpublished or mark it as inactive until reviewed.",
-        "For editorial articles and roadmap content, mistakes are corrected when identified. We also remove or revise content when it is duplicated, misleading, or no longer useful to readers.",
-        "Our goal is to maintain a trustworthy platform that helps users discover relevant job opportunities and career guidance without confusing or low-value content."
-      ]}
+      eyebrow="Policies"
+      heading="Content correction policy"
+      sections={sections}
     />
   );
 }

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import {
   Compass, UserRound, Users, Code2, Terminal, Star, Wrench, FileText, Building2,
   MessageCircle, Video, ClipboardCheck, IndianRupee, AlertTriangle, HelpCircle,
@@ -426,8 +426,8 @@ export default function InterviewTips(){
         <p>Create a clean, professional, ATS-friendly resume for your next tech opportunity with jobkhojoAI.</p>
         <Link to="/career-guide/resume-builder" className="btn btn-primary">Build My Resume →</Link>
         <div className="guide-cta-links">
-          <a href="/#jobs">Explore Tech Jobs →</a>
-          <Link to="/?category=Internship#jobs">Find Internships →</Link>
+          <Link to="/jobs">Explore jobs →</Link>
+          <Link to="/jobs?type=internship">Find internships →</Link>
           <a href="/#roadmaps">Explore Career Roadmaps →</a>
         </div>
       </div>

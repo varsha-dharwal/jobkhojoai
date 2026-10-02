@@ -1,6 +1,11 @@
 import { useState } from "react";
+import { companyLogo } from "../lib/companyLogos";
 
-const COLORS = ["#0057D9", "#00C48C", "#FF7A00", "#7C4DFF", "#FF3B77", "#00B8D9", "#FFAB00", "#36B37E"];
+// Soft tint + strong text pairs (all pass WCAG AA) so initials badges stay calm.
+const TINTS = [
+  ["#EFF6FF", "#1D4ED8"], ["#F0FDFA", "#0F766E"], ["#FEF3C7", "#92400E"], ["#F5F3FF", "#5B21B6"],
+  ["#FCE7F3", "#9D174D"], ["#ECFEFF", "#155E75"], ["#F1F5F9", "#334155"], ["#ECFDF5", "#166534"],
+];
 
 function hashString(str){
   let hash = 0;
@@ -9,37 +14,35 @@ function hashString(str){
 }
 
 function getInitials(name){
-  const words = name.trim().split(/\s+/).slice(0, 2);
+  const words = name.replace(/[^\p{L}\p{N}\s]/gu, " ").trim().split(/\s+/).slice(0, 2);
   return words.map(w => w[0]?.toUpperCase() || "").join("") || "?";
 }
 
-export default function CompanyAvatar({ name, logoUrl, size = 44 }){
+export default function CompanyAvatar({ name = "", logoUrl, size = 44 }){
   const [failed, setFailed] = useState(false);
+  const style = { width: size, height: size };
+  const src = logoUrl || companyLogo(name);
 
-  if (logoUrl && !failed) {
+  if (src && !failed) {
     return (
       <img
-        src={logoUrl}
-        alt={`${name} logo`}
-        className="company-avatar"
+        src={src}
+        alt=""
+        className="company-avatar company-avatar-img"
         width={size}
         height={size}
         loading="lazy"
         decoding="async"
-        style={{ width:size, height:size, objectFit:"contain", background:"#fff" }}
+        style={style}
         onError={() => setFailed(true)}
       />
     );
   }
 
-  const color = COLORS[hashString(name || "") % COLORS.length];
+  const [bg, fg] = TINTS[hashString(name) % TINTS.length];
   return (
-    <div
-      className="company-avatar"
-      style={{ width:size, height:size, background:color, fontSize:Math.round(size * 0.38) }}
-      aria-hidden="true"
-    >
-      {getInitials(name || "?")}
-    </div>
+    <span className="company-avatar" style={{ ...style, background: bg, color: fg, fontSize: Math.round(size * 0.36) }} aria-hidden="true">
+      {getInitials(name)}
+    </span>
   );
 }

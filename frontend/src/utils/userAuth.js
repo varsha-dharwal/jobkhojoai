@@ -2,11 +2,15 @@ const TOKEN_KEY = "jobkhojoai_user_token";
 const PROFILE_KEY = "jobkhojoai_user_profile";
 const CHANGE_EVENT = "userauth-changed";
 
+// Guarded so pages that read these during render can be pre-rendered at build time.
+const hasStorage = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+
 export function getUserToken(){
-  return localStorage.getItem(TOKEN_KEY);
+  return hasStorage() ? localStorage.getItem(TOKEN_KEY) : null;
 }
 
 export function getUserProfile(){
+  if (!hasStorage()) return null;
   try {
     return JSON.parse(localStorage.getItem(PROFILE_KEY));
   } catch {
