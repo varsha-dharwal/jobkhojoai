@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { Form, Link, useLoaderData, useLocation, useNavigate } from "react-router";
 import {
-  ArrowRight, Search, MapPin, ChevronRight, CircleCheck, Link2, ShieldCheck, UserRound, GraduationCap,
-  House, Building2, FileText, SquareArrowOutUpRight, Code2, Server, Layers, BarChart3, Palette, Cloud,
+  ArrowRight, Search, MapPin, ChevronRight, CircleCheck, Link2, ShieldCheck,
+  FileText, SquareArrowOutUpRight, Code2, Server, Layers, BarChart3, Palette, Cloud,
 } from "lucide-react";
 import SEO, { JsonLd, SITE_URL } from "../components/SEO";
-import { JobTile } from "../components/JobCard";
 import { fetchAllJobs, toListJob } from "../lib/api";
 import { experienceLevel, isRemote } from "../lib/jobs";
 import { guideMeta, readingMinutes } from "../lib/guides";
@@ -13,34 +12,29 @@ import { ROADMAPS } from "../data/roadmaps";
 import { CAREER_GUIDE_ARTICLES } from "../data/careerGuides";
 import { legacyJobsUrl } from "../lib/jobFilters";
 
-const CITY_GROUPS = [
-  { label: "Bengaluru", q: "bengaluru", re: /bangalore|bengaluru|benguluru/i },
-  { label: "Hyderabad", q: "hyderabad", re: /hyderabad/i },
-  { label: "Mumbai", q: "mumbai", re: /mumbai/i },
-  { label: "Pune", q: "pune", re: /pune/i },
-  { label: "Chennai", q: "chennai", re: /chennai/i },
-  { label: "Delhi NCR", q: "noida", re: /delhi|noida|gurugram|gurgaon/i },
-];
-
 const FEATURED_PATHS = ["frontend", "backend", "full-stack", "data-science"];
 const FEATURED_GUIDES = ["resume-guide-for-it-freshers", "how-to-spot-fake-job-posts", "internship-application-guide"];
 
 // Runs at build time; every number on the page is counted from the real listings.
 export async function loader(){
   const jobs = await fetchAllJobs();
-  const count = test => jobs.filter(test).length;
-  const topCity = CITY_GROUPS
-    .map(c => ({ ...c, n: count(j => c.re.test(j.location || "")) }))
-    .sort((a, b) => b.n - a.n)[0];
+  const newestJobs = jobs.map(toListJob).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   return {
-    latest: jobs.slice(0, 8).map(toListJob),
+    jobSections: [
+      {
+        key: "tech", title: "Tech Jobs", to: "/jobs",
+        listings: newestJobs.filter(j => /software|developer|engineer|data|\bit\b|web|cloud|ai|machine learning|qa|tester|security|technical|javascript|react|python|java/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10),
+      },
+      { key: "remote", title: "Remote Jobs", to: "/jobs?mode=remote", listings: newestJobs.filter(isRemote).slice(0, 10) },
+      { key: "fresher", title: "Fresher & Internships", to: "/jobs?exp=fresher", listings: newestJobs.filter(j => experienceLevel(j) === "fresher" || j.category === "Internship").slice(0, 10) },
+      {
+        key: "tech-news", title: "AI & Latest Tech News", to: "/career-insights", isArticle: true,
+        listings: CAREER_GUIDE_ARTICLES.filter(a => /ai|tech|developer|react|javascript|software|portfolio/i.test(`${a.title} ${a.summary}`)).slice(0, 10),
+      },
+      { key: "walk-in", title: "Walk-In Interviews", to: "/jobs?q=walk", listings: newestJobs.filter(j => /walk[\s-]?in/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10) },
+      { key: "international", title: "International Jobs", to: "/jobs?region=usa", listings: newestJobs.filter(j => /\b(united states|usa|u\.s\.?a?\.?)\b/i.test(j.location || "")).slice(0, 10) },
+    ],
     total: jobs.length,
-    browse: [
-      { key: "fresher", to: "/jobs?exp=fresher", label: "Freshers", n: count(j => experienceLevel(j) === "fresher") },
-      { key: "internship", to: "/jobs?type=internship", label: "Internships", n: count(j => j.category === "Internship") },
-      { key: "remote", to: "/jobs?mode=remote", label: "Remote jobs", n: count(isRemote) },
-      ...(topCity?.n ? [{ key: "city", to: `/jobs?location=${topCity.q}`, label: `Jobs in ${topCity.label}`, n: topCity.n }] : []),
-    ].filter(t => t.n > 0).map(({ key, to, label, n }) => ({ key, to, label, n })),
     paths: FEATURED_PATHS.filter(slug => ROADMAPS[slug]).map(slug => ({ slug, title: ROADMAPS[slug].title, steps: ROADMAPS[slug].steps.length })),
     guides: FEATURED_GUIDES
       .map(slug => CAREER_GUIDE_ARTICLES.find(a => a.slug === slug))
@@ -70,7 +64,6 @@ const WEBSITE_SCHEMA = {
   },
 };
 
-const BROWSE_ICONS = { fresher: UserRound, internship: GraduationCap, remote: House, city: Building2 };
 const PATH_ICONS = { frontend: Code2, backend: Server, "full-stack": Layers, "data-science": BarChart3, "ui-ux": Palette, cloud: Cloud };
 
 const HERO_IMAGE = {
@@ -91,7 +84,7 @@ function SectionHead({ id, title, subtitle, link }){
 }
 
 export default function Home(){
-  const { latest, total, browse, paths, guides } = useLoaderData();
+  const { jobSections, total, paths, guides } = useLoaderData();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -158,49 +151,42 @@ export default function Home(){
         </div>
       </section>
 
-      <section className="home-section" aria-labelledby="latest-heading">
+      <section className="home-section home-listing-section" aria-labelledby="latest-heading">
         <div className="container">
           <SectionHead
             id="latest-heading"
-            title="Latest opportunities"
-            subtitle="Recently added jobs and internships. Every listing links to the original application page."
+            title="Explore opportunities"
+            subtitle="Browse recent openings and practical tech guides by category."
             link={{ to: "/jobs", label: `View all ${total} jobs` }}
           />
-          <div className="job-tile-grid">
-            {latest.map(job => <JobTile key={job._id} job={job} />)}
+          <div className="home-listing-grid">
+            {jobSections.map(section => {
+              return (
+                <section className="home-listing-card" key={section.key} aria-labelledby={`home-list-${section.key}`}>
+                  <header className="home-listing-card-head">
+                    <h3 id={`home-list-${section.key}`}>{section.title}</h3>
+                  </header>
+                  {section.listings.length ? (
+                    <ul className="home-listing-items">
+                      {section.listings.map(item => (
+                        <li key={section.isArticle ? item.slug : item._id}>
+                          <Link to={section.isArticle ? `/career-guide/${item.slug}` : `/jobs/${item.slug}`}>
+                            <ArrowRight className="home-listing-item-arrow" size={16} aria-hidden="true" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="home-listing-empty">No current listings in this category. Check back soon.</p>
+                  )}
+                  <Link className="home-listing-more" to={section.to}>Read More <ArrowRight size={15} aria-hidden="true" /></Link>
+                </section>
+              );
+            })}
           </div>
         </div>
       </section>
-
-      {browse.length > 0 && (
-        <section className="home-section home-band" aria-labelledby="browse-heading">
-          <div className="container">
-            <SectionHead
-              id="browse-heading"
-              title="Browse jobs"
-              subtitle="Find opportunities that match where you are right now."
-              link={{ to: "/jobs", label: "All jobs" }}
-            />
-            <ul className="link-card-grid">
-              {browse.map(t => {
-                const Icon = BROWSE_ICONS[t.key];
-                return (
-                  <li key={t.key}>
-                    <Link to={t.to} className="link-card">
-                      <span className={`link-card-icon tone-${t.key}`}><Icon size={20} aria-hidden="true" /></span>
-                      <span className="link-card-text">
-                        <span className="link-card-title">{t.label}</span>
-                        <span className="link-card-meta">{t.n} {t.n === 1 ? "job" : "jobs"}</span>
-                      </span>
-                      <ChevronRight size={18} aria-hidden="true" className="link-card-chevron" />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </section>
-      )}
 
       <section className="home-section" aria-labelledby="how-heading">
         <div className="container">

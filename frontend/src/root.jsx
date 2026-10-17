@@ -1,5 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError } from "react-router";
 import SiteHeader from "./components/SiteHeader";
+import AnnouncementBar from "./components/AnnouncementBar";
 import SiteFooter from "./components/SiteFooter";
 import AskAI from "./components/AskAI";
 import { ADSENSE_CLIENT } from "./config/adsense";
@@ -37,6 +38,7 @@ export function Layout({ children }){
 export default function App(){
   return (
     <>
+      <AnnouncementBar />
       <SiteHeader />
       <div id="main" className="site-main">
         <Outlet />
@@ -62,8 +64,12 @@ export function ErrorBoundary(){
   const error = useRouteError();
   const notFound = isRouteErrorResponse(error) && error.status === 404;
   if (!notFound) console.error(error);
+  const devError = import.meta.env.DEV && !notFound
+    ? (error instanceof Error ? error.message : String(error?.statusText || error?.data || error || "Unknown error"))
+    : "";
   return (
     <>
+      <AnnouncementBar />
       <SiteHeader />
       <main id="main" className="container status-page">
         <p className="eyebrow">{notFound ? "Error 404" : "Something went wrong"}</p>
@@ -73,6 +79,7 @@ export function ErrorBoundary(){
             ? "The link may be old, or the job may have closed."
             : "Please refresh the page. If it keeps happening, let us know through the contact page."}
         </p>
+        {devError && <pre className="error-detail">{devError}</pre>}
         <div className="status-page-actions">
           <a href="/jobs" className="btn btn-primary">Browse jobs</a>
           <a href="/" className="btn btn-secondary">Go to homepage</a>

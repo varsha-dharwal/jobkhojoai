@@ -42,42 +42,6 @@ export default function JobCard({ job, headingLevel = 3 }){
   );
 }
 
-// Compact vertical card for grids (homepage "Latest opportunities").
-export function JobTile({ job }){
-  const exp = experienceText(job);
-  const skills = skillsList(job, 3);
-  const location = locationLabel(job);
-  const mode = workMode(job);
-  return (
-    <article className="job-tile">
-      <div className="job-tile-head">
-        <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={44} />
-        <div className="job-tile-text">
-          <h3 className="job-tile-title">
-            <Link to={`/jobs/${job.slug}`} className="stretched-link">{job.title}</Link>
-          </h3>
-          <p className="job-tile-company">{job.organization}</p>
-          <ul className="job-tile-meta">
-            <li><MapPin size={13} aria-hidden="true" /><span>{location}{mode === "Remote" && !/remote/i.test(location) ? " · Remote" : ""}</span></li>
-            <li><Briefcase size={13} aria-hidden="true" /><span>{jobTypeLabel(job)}{exp && exp.length <= 14 ? ` · ${exp}` : mode === "On-site" ? " · On-site" : ""}</span></li>
-          </ul>
-        </div>
-      </div>
-      {skills.length > 0 && (
-        <ul className="chip-list job-tile-skills" aria-label="Skills">
-          {skills.map(s => <li key={s} className="chip chip-quiet">{s}</li>)}
-        </ul>
-      )}
-      <div className="job-tile-foot">
-        <span className="job-card-posted" suppressHydrationWarning>
-          <Clock size={13} aria-hidden="true" />{postedLabel(job.createdAt).replace("Posted ", "")}
-        </span>
-        <SaveJobButton job={job} compact />
-      </div>
-    </article>
-  );
-}
-
 export function JobCardSkeleton(){
   return (
     <div className="job-card job-card-skeleton" aria-hidden="true">

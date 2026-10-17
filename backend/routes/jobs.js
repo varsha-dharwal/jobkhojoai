@@ -57,13 +57,19 @@ router.get("/meta/companies", async (req, res) => {
 
 // GET /api/jobs/:slug
 router.get("/:slug", async (req, res) => {
+  const startedAt = performance.now();
   try {
-    const job = await Job.findOne(publicJobFilter({ slug: req.params.slug }));
+    const job = await Job.findOne(publicJobFilter({ slug: req.params.slug }))
+      .select("-__v")
+      .lean();
     if (!job) return res.status(404).json({ message: "Job not found" });
-    res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
+    // Keep freshness bounded: a listing can expire or be unpublished at any time.
+    res.set("Cache-Control", "public, max-age=30, must-revalidate");
     res.json(job);
   } catch (err) {
     res.status(500).json({ message: "Could not load job", error: err.message });
+  } finally {
+    console.info(`[api] GET /api/jobs/:slug ${res.statusCode} ${Math.round(performance.now() - startedAt)}ms`);
   }
 });
 
