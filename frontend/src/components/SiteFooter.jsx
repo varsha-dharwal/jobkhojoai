@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { ArrowRight, Mail, MessageCircle } from "lucide-react";
+import { ArrowRight, BellRing, CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import Logo from "./Logo";
 import { CONTACT_EMAIL, INSTAGRAM_HANDLE, INSTAGRAM_URL, WHATSAPP_URL } from "../lib/site";
 import { API_BASE } from "../lib/api";
@@ -67,31 +67,49 @@ function WhatsAppIcon(){
 
 export default function SiteFooter(){
   const [email, setEmail] = useState("");
-  const [suggestion, setSuggestion] = useState("");
-  const [sending, setSending] = useState(false);
+  const [code, setCode] = useState("");
+  const [step, setStep] = useState("email");
+  const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState(null);
 
-  async function submitSuggestion(event){
+  async function request(path, body){
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message || "We couldn't complete your subscription. Please try again.");
+    return result;
+  }
+
+  async function sendVerificationCode(event){
     event.preventDefault();
-    if (sending) return;
-    setSending(true);
+    if (busy) return;
+    setBusy(true);
     setFeedback(null);
     try {
-      const formData = new FormData(event.currentTarget);
-      const response = await fetch(`${API_BASE}/suggestions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, suggestion, website: formData.get("website") }),
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.message || "We couldn't send your suggestion. Please try again.");
-      setEmail("");
-      setSuggestion("");
-      setFeedback({ type: "success", text: "Thanks! Your suggestion has been sent to our team." });
+      await request("/alerts/send-code", { email });
+      setStep("verify");
+      setFeedback({ type: "info", text: `We sent a 6-digit verification code to ${email.trim()}.` });
     } catch (error) {
-      setFeedback({ type: "error", text: error.message || "We couldn't send your suggestion. Please try again." });
+      setFeedback({ type: "error", text: error.message || "We couldn't send your verification code. Please try again." });
     } finally {
-      setSending(false);
+      setBusy(false);
+    }
+  }
+
+  async function verifyAndSubscribe(event){
+    event.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setFeedback(null);
+    try {
+      await request("/alerts/verify", { email, code });
+      setStep("done");
+      setFeedback({ type: "success", text: "You're subscribed! Daily job updates will arrive in your inbox." });
+    } catch (error) {
+      setFeedback({ type: "error", text: error.message || "We couldn't verify your email. Please try again." });
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -116,38 +134,45 @@ export default function SiteFooter(){
               </ul>
             </div>
           ))}
-          <section className="footer-suggestion" aria-labelledby="footer-suggestion-title">
-            <h2 id="footer-suggestion-title">Suggest a <span>Job Post</span></h2>
-            <p>Found an opportunity we should share? Send it to us.</p>
-            <form onSubmit={submitSuggestion}>
-              <label className="footer-suggestion-field">
-                <Mail size={16} aria-hidden="true" />
-                <span className="sr-only">Your email address</span>
-                <input
-                  type="email" name="email" autoComplete="email" required maxLength={254}
-                  placeholder="Your email address" value={email}
-                  onChange={event => setEmail(event.target.value)}
-                />
-              </label>
-              <label className="footer-suggestion-field footer-suggestion-message">
-                <MessageCircle size={16} aria-hidden="true" />
-                <span className="sr-only">Job details or your suggestion</span>
-                <textarea
-                  name="suggestion" required minLength={10} maxLength={5000}
-                  placeholder="Job details or your suggestion..." value={suggestion}
-                  onChange={event => setSuggestion(event.target.value)}
-                />
-              </label>
-              <label className="footer-suggestion-trap" aria-hidden="true">
-                Leave this field empty
-                <input name="website" type="text" tabIndex={-1} autoComplete="off" />
-              </label>
-              <button className="footer-suggestion-submit" type="submit" disabled={sending}>
-                {sending ? "Sending..." : "Send Suggestion"}
-                <ArrowRight size={16} aria-hidden="true" />
-              </button>
-              {feedback && <p className={`footer-suggestion-status is-${feedback.type}`} role="status">{feedback.text}</p>}
-            </form>
+          <section className="footer-newsletter" aria-labelledby="footer-newsletter-title">
+            <div className="footer-newsletter-heading">
+              <span className="footer-newsletter-icon"><BellRing size={20} aria-hidden="true" /></span>
+              <div>
+                <h2 id="footer-newsletter-title">Get the latest <span>job updates</span></h2>
+                <p>Fresh opportunities, sent straight to your inbox every day.</p>
+              </div>
+            </div>
+            {step === "done" ? (
+              <div className="footer-newsletter-complete"><CheckCircle2 size={21} aria-hidden="true" /><span>You're subscribed with <strong>{email}</strong></span></div>
+            ) : (
+              <form className="footer-newsletter-form" onSubmit={step === "email" ? sendVerificationCode : verifyAndSubscribe}>
+                <label className="footer-newsletter-field">
+                  <Mail size={18} aria-hidden="true" />
+                  <span className="sr-only">Your email address</span>
+                  <input
+                    type="email" name="email" autoComplete="email" required maxLength={254}
+                    placeholder="Your email address" value={email} readOnly={step === "verify"}
+                    onChange={event => setEmail(event.target.value)}
+                  />
+                </label>
+                {step === "verify" && <label className="footer-newsletter-field">
+                  <ShieldCheck size={18} aria-hidden="true" />
+                  <span className="sr-only">6-digit verification code</span>
+                  <input
+                    type="text" name="code" inputMode="numeric" autoComplete="one-time-code"
+                    pattern="[0-9]{6}" maxLength={6} placeholder="Enter the 6-digit code"
+                    value={code} onChange={event => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} required
+                  />
+                </label>}
+                <button className="footer-newsletter-submit" type="submit" disabled={busy || (step === "verify" && code.length !== 6)}>
+                  {busy ? "Please wait..." : step === "email" ? "Get job alerts" : "Verify & subscribe"}
+                  {!busy && <ArrowRight size={18} aria-hidden="true" />}
+                </button>
+              </form>
+            )}
+            {feedback && <p className={`footer-newsletter-status is-${feedback.type}`} role={feedback.type === "error" ? "alert" : "status"}>{feedback.text}</p>}
+            {step === "email" && <p className="footer-newsletter-privacy">Free daily updates. Unsubscribe anytime.</p>}
+            {step === "verify" && <button className="footer-newsletter-change" type="button" onClick={() => { setStep("email"); setCode(""); setFeedback(null); }}>Use a different email</button>}
           </section>
         </div>
         <div className="site-footer-bottom">

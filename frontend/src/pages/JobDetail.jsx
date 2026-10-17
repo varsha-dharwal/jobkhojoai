@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import {
-  ArrowUpRight, Share2, Check, MapPin, Briefcase, Clock, GraduationCap, Wallet, Users,
-  CalendarDays, Globe, Laptop, ShieldAlert, Route as RouteIcon, ChevronRight,
+  ArrowUpRight, Share2, Check, MapPin, Briefcase, Clock, Wallet,
+  CalendarDays, Globe, Laptop, Route as RouteIcon, ChevronRight,
 } from "lucide-react";
 import SEO, { JsonLd } from "../components/SEO";
 import CompanyAvatar from "../components/CompanyAvatar";
@@ -10,10 +10,12 @@ import SaveJobButton from "../components/SaveJobButton";
 import JobCard from "../components/JobCard";
 import AdSlot from "../components/AdSlot";
 import { AD_SLOTS } from "../config/adsense";
+import JobArticle from "../components/JobArticle";
+import { JOB_ARTICLE_AUTHOR } from "../lib/site";
 import { fetchAllJobs, fetchJob, toListJob } from "../lib/api";
 import {
   applyTarget, experienceText, formatDate, jobPostingSchema, jobTypeLabel, locationLabel, postedLabel,
-  relatedPathSlug, salaryText, similarJobs, skillsList, textLines, workMode,
+  relatedPathSlug, salaryText, similarJobs, textLines, workMode,
 } from "../lib/jobs";
 import { ROADMAPS } from "../data/roadmaps";
 
@@ -43,19 +45,12 @@ export async function clientLoader({ params, serverLoader }){
   if (job === undefined) return { job: null, similar: [], failed: true };
   if (!job) return { job: null, similar: [] };
   const all = await fetchAllJobs().catch(() => []);
-  return { job, similar: similarJobs(job, all).map(toListJob) };
-}
-
-function Paragraphs({ text }){
-  const lines = textLines(text);
-  if (!lines.length) return null;
-  return <div className="prose">{lines.map((p, i) => <p key={i}>{p}</p>)}</div>;
-}
-
-function Bullets({ text }){
-  const lines = textLines(text);
-  if (!lines.length) return null;
-  return <ul className="prose-list">{lines.map((item, i) => <li key={i}>{item}</li>)}</ul>;
+  const pathSlug = relatedPathSlug(job);
+  return {
+    job,
+    similar: similarJobs(job, all).map(toListJob),
+    path: pathSlug && ROADMAPS[pathSlug] ? { slug: pathSlug, title: ROADMAPS[pathSlug].title } : null,
+  };
 }
 
 function Fact({ icon: Icon, label, children }){
@@ -70,32 +65,48 @@ function Fact({ icon: Icon, label, children }){
 
 function ShareButton({ job }){
   const [copied, setCopied] = useState(false);
+  const [shareUnavailable, setShareUnavailable] = useState(false);
   async function share(){
+    setShareUnavailable(false);
     const url = `${window.location.origin}/jobs/${job.slug}`;
     if (navigator.share) {
-      try { await navigator.share({ title: `${job.title} at ${job.organization}`, url }); } catch { /* cancelled */ }
-      return;
+      try {
+        await navigator.share({ title: `${job.title} at ${job.organization}`, url });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
     }
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
-    } catch { /* clipboard unavailable */ }
+    } catch { setShareUnavailable(url); }
   }
   return (
-    <button type="button" className="btn btn-secondary" onClick={share}>
-      {copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}
-      <span>{copied ? "Link copied" : "Share"}</span>
-    </button>
+    <>
+      <button type="button" className="btn btn-secondary" onClick={share}>
+        {copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}
+        <span>{copied ? "Link copied" : "Share Job"}</span>
+      </button>
+      {shareUnavailable && <label className="share-status">Copy this link if sharing is unavailable:
+        <input type="url" readOnly value={shareUnavailable} onFocus={event => event.target.select()} aria-label="Job page link to copy" />
+      </label>}
+    </>
   );
 }
 
-function ApplyButton({ job, target, className = "" }){
+function ApplyButton({ job, className = "" }){
   return (
     <a href={job.applyLink} target="_blank" rel="noopener noreferrer nofollow" className={`btn btn-primary btn-lg ${className}`}>
-      {target.label} <ArrowUpRight size={18} aria-hidden="true" />
+      Apply Here <ArrowUpRight size={18} aria-hidden="true" />
     </a>
   );
+}
+
+function publicationTime(date){
+  if (!date || Number.isNaN(new Date(date).getTime())) return "";
+  return new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }).format(new Date(date));
 }
 
 function Unavailable({ failed }){
@@ -129,11 +140,13 @@ export default function JobDetail(){
   if (!job) return <Unavailable failed={failed} />;
 
   const target = applyTarget(job);
-  const skills = skillsList(job);
   const salary = salaryText(job);
   const exp = experienceText(job);
   const location = locationLabel(job);
   const descriptionText = textLines(job.roleDescription).join(" ");
+  const validCreatedAt = job.createdAt && !Number.isNaN(new Date(job.createdAt).getTime());
+  const publishedDate = validCreatedAt ? formatDate(job.createdAt) : "";
+  const publishedTime = validCreatedAt ? publicationTime(job.createdAt) : "";
 
   return (
     <main className="container job-page">
@@ -165,6 +178,11 @@ export default function JobDetail(){
             <CompanyAvatar name={job.organization} logoUrl={job.logoUrl} size={56} />
             <div className="job-header-text">
               <h1>{job.title}</h1>
+              {JOB_ARTICLE_AUTHOR?.name && <p className="job-byline">
+                By {JOB_ARTICLE_AUTHOR.name}
+                {publishedDate && <> <span aria-hidden="true">·</span> {publishedDate}</>}
+                {publishedTime && <> <span aria-hidden="true">·</span> {publishedTime}</>}
+              </p>}
               <p className="job-header-company">{job.organization}</p>
               <ul className="job-header-meta">
                 <li><MapPin size={15} aria-hidden="true" />{location}</li>
@@ -172,66 +190,14 @@ export default function JobDetail(){
                 <li><Briefcase size={15} aria-hidden="true" />{jobTypeLabel(job)}{exp ? ` · ${exp}` : ""}</li>
                 {salary && <li><Wallet size={15} aria-hidden="true" />{salary}</li>}
               </ul>
-              <p className="job-header-posted" suppressHydrationWarning>
-                <Clock size={14} aria-hidden="true" /> {postedLabel(job.createdAt)}
-                {job.lastDate && <> · Apply by {formatDate(job.lastDate)}</>}
-              </p>
+              {(publishedDate || job.lastDate) && <p className="job-header-posted" suppressHydrationWarning>
+                {publishedDate && <><Clock size={14} aria-hidden="true" /> {postedLabel(job.createdAt)}</>}
+                {job.lastDate && <>{publishedDate ? " | " : ""}Apply by {formatDate(job.lastDate)}</>}
+              </p>}
             </div>
           </header>
 
-          <div className="job-actions">
-            <ApplyButton job={job} target={target} />
-            <SaveJobButton job={job} />
-            <ShareButton job={job} />
-          </div>
-          {target.note && <p className="apply-note">{target.note} JobKhojo doesn't collect applications.</p>}
-
-          {skills.length > 0 && (
-            <section className="job-section" aria-labelledby="skills-heading">
-              <h2 id="skills-heading">Skills</h2>
-              <ul className="chip-list">{skills.map(s => <li key={s} className="chip">{s}</li>)}</ul>
-            </section>
-          )}
-
-          {textLines(job.roleDescription).length > 0 && (
-            <section className="job-section" aria-labelledby="about-role">
-              <h2 id="about-role">About the role</h2>
-              <Paragraphs text={job.roleDescription} />
-            </section>
-          )}
-
-          {textLines(job.responsibilities).length > 0 && (
-            <section className="job-section" aria-labelledby="responsibilities">
-              <h2 id="responsibilities">Responsibilities</h2>
-              <Bullets text={job.responsibilities} />
-            </section>
-          )}
-
-          {textLines(job.requirements).length > 0 && (
-            <section className="job-section" aria-labelledby="requirements">
-              <h2 id="requirements">Requirements</h2>
-              <Bullets text={job.requirements} />
-            </section>
-          )}
-
-          {textLines(job.aboutCompany).length > 0 && (
-            <section className="job-section" aria-labelledby="about-company">
-              <h2 id="about-company">About {job.organization}</h2>
-              <Paragraphs text={job.aboutCompany} />
-            </section>
-          )}
-
-          <section className="callout callout-warning" aria-labelledby="before-apply">
-            <h2 id="before-apply"><ShieldAlert size={18} aria-hidden="true" /> Before you apply</h2>
-            <ul>
-              <li>Genuine employers don't charge fees for interviews, training, "registration" or offer letters.</li>
-              <li>If anything feels off, check the company's own careers page first. <Link to="/career-guide/how-to-spot-fake-job-posts">How to spot a fake job</Link></li>
-            </ul>
-          </section>
-
-          <div className="job-bottom-apply">
-            <ApplyButton job={job} target={target} />
-          </div>
+          <JobArticle job={job} relatedJobs={similar} path={path} />
 
           <div className="job-inline-ad">
             <AdSlot slot={AD_SLOTS.jobDetailMobileBanner} style={{ minHeight: 100 }} />
@@ -239,19 +205,23 @@ export default function JobDetail(){
         </article>
 
         <aside className="job-aside">
-          <section className="panel" aria-labelledby="overview-heading">
+          <section className="panel job-action-panel" aria-label="Job actions">
+            <ApplyButton job={job} />
+            <div className="job-action-secondary">
+              <SaveJobButton job={job} />
+              <ShareButton job={job} />
+            </div>
+            {target.note && <p className="apply-note">{target.note} JobKhojo doesn't collect applications.</p>}
+          </section>
+
+          <section className="panel job-overview-panel" aria-labelledby="overview-heading">
             <h2 id="overview-heading">Job overview</h2>
             <dl className="facts">
-              <Fact icon={CalendarDays} label="Posted"><span suppressHydrationWarning>{formatDate(job.createdAt)}</span></Fact>
+              <Fact icon={CalendarDays} label="Posted">{publishedDate ? <span suppressHydrationWarning>{publishedDate}</span> : null}</Fact>
               <Fact icon={Briefcase} label="Job type">{jobTypeLabel(job)}</Fact>
               <Fact icon={Laptop} label="Work mode">{workMode(job)}</Fact>
               <Fact icon={MapPin} label="Location">{location}</Fact>
               <Fact icon={Clock} label="Experience">{exp}</Fact>
-              <Fact icon={GraduationCap} label="Education">{job.education}</Fact>
-              <Fact icon={Wallet} label="Salary">{salary}</Fact>
-              <Fact icon={Users} label="Openings">{job.vacancies}</Fact>
-              <Fact icon={CalendarDays} label="Starts">{job.startDate ? formatDate(job.startDate) : null}</Fact>
-              <Fact icon={CalendarDays} label="Apply by">{job.lastDate ? formatDate(job.lastDate) : null}</Fact>
               <Fact icon={Globe} label="Apply at">{target.host}</Fact>
             </dl>
           </section>
@@ -287,7 +257,7 @@ export default function JobDetail(){
           <strong>{job.title}</strong>
           <span>{job.organization}</span>
         </div>
-        <ApplyButton job={job} target={target} />
+        <ApplyButton job={job} />
       </div>
     </main>
   );
