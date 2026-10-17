@@ -8,6 +8,8 @@ import jobRoutes from "./routes/jobs.js";
 import aiRoutes from "./routes/ai.js";
 import userRoutes from "./routes/users.js";
 import resumeAiRoutes from "./routes/resumeAi.js";
+import alertRoutes, { sendDailyJobDigest } from "./routes/alerts.js";
+import suggestionRoutes from "./routes/suggestions.js";
 
 dotenv.config();
 
@@ -64,6 +66,8 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/resume-ai", resumeAiRoutes);
+app.use("/api/alerts", alertRoutes);
+app.use("/api/suggestions", suggestionRoutes);
 
 // 404 fallback for unknown API routes
 app.use("/api", (req, res) => res.status(404).json({ message: "Route not found" }));
@@ -72,4 +76,16 @@ const PORT = process.env.PORT || 5000;
 
 connectDB().then(() => {
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  let lastDigestDay = "";
+  setInterval(async () => {
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: process.env.DIGEST_TIME_ZONE || "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date());
+    const value = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+    const day = `${value.year}-${value.month}-${value.day}`;
+    const sendHour = Number(process.env.DIGEST_HOUR ?? 9);
+    if (value.hour === String(sendHour).padStart(2, "0") && value.minute === "00" && lastDigestDay !== day) {
+      lastDigestDay = day;
+      try { await sendDailyJobDigest(); }
+      catch (error) { console.error("Daily job digest failed:", error.message); }
+    }
+  }, 60_000);
 });

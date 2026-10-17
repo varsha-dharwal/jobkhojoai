@@ -78,6 +78,17 @@ the free backend is asleep.
   doesn't fall asleep.
 - **Database** → MongoDB Atlas (free tier).
 
+## 5. Daily job alerts
+
+Apply buttons ask visitors whether they want daily job emails. Email subscriptions require a Resend account and
+verified sender domain. Set `RESEND_API_KEY`, `MAIL_FROM`, `PUBLIC_SITE_URL` and `API_PUBLIC_URL` in the backend
+environment. The backend sends a six-digit email code and emails newly posted active jobs daily at
+`DIGEST_HOUR` in `DIGEST_TIME_ZONE` (defaults to 09:00 Asia/Kolkata).
+
+To enable Google sign-in, set the same Google Identity Services web client ID as `GOOGLE_CLIENT_ID` in the
+backend and `VITE_GOOGLE_CLIENT_ID` in the frontend build environment. Without these provider settings, the
+apply prompt still works, but the matching sign-in/email delivery option is unavailable.
+
 ## Notes
 
 - No password-reset flow for admin — if you forget it, update `ADMIN_PASSWORD` in `.env` directly and redeploy
