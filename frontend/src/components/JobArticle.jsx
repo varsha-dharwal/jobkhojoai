@@ -1,4 +1,4 @@
-import { BookOpen, MessageCircle } from "lucide-react";
+import { BookOpen, ClipboardList, MessageCircle } from "lucide-react";
 import { Link } from "react-router";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "../lib/site";
 import { applyTarget, experienceText, formatDate, locationLabel, salaryText, skillsList, textLines, workMode } from "../lib/jobs";
@@ -20,6 +20,7 @@ function OverviewTable({ rows }){
   return (
     <div className="job-article-table-wrap">
       <table className="job-article-table">
+        <thead><tr><th className="job-article-table-title" colSpan="2" scope="colgroup">Job listing overview</th></tr></thead>
         <tbody>{rows.map(([label, value]) => (
           <tr key={label}><th scope="row">{label}</th><td>{value || MISSING}</td></tr>
         ))}</tbody>
@@ -36,18 +37,28 @@ function SourceText({ text, list = false }){
     : <div className="prose">{lines.map((line, i) => <p key={`${i}-${line}`}>{line}</p>)}</div>;
 }
 
+function concise(text, limit){
+  const value = textLines(text).join(" ");
+  return value.length > limit ? `${value.slice(0, limit - 1).replace(/\s+\S*$/, "")}…` : value;
+}
+
 function introduction(job){
   const exp = experienceText(job);
   const education = (job.education || "").trim();
-  const role = textLines(job.roleDescription).join(" ");
-  const roleSummary = role.length > 360 ? `${role.slice(0, 357).replace(/\s+\S*$/, "")}…` : role;
+  const roleSummary = concise(job.roleDescription, 300);
+  const responsibilitySummary = concise(job.responsibilities, 220);
+  const requirementSummary = concise(job.requirements, 220);
+  const skills = skillsList(job, 6);
   const applyHost = applyTarget(job).host;
   const facts = [
     `${job.organization} is named in this listing for the ${job.title} position in ${locationLabel(job)}.`,
-    `The listed arrangement is ${workMode(job).toLowerCase()}${job.category ? ` and ${job.category.toLowerCase()}` : ""}${exp ? `, with ${exp} of experience requested` : ""}${education ? `; the listed education requirement is ${education}` : ""}.`,
-    roleSummary ? `The available role description says: ${roleSummary}` : "The listing does not include a detailed role description, so candidates should review the source posting for day-to-day duties.",
-    applyHost ? `Applications are directed to ${applyHost}; review the original posting and confirm its current instructions before sharing personal information.` : "Review the original listing for application instructions before sharing personal information.",
-  ];
+    `The listing describes the arrangement as ${workMode(job).toLowerCase()}${job.category ? ` and ${job.category.toLowerCase()}` : ""}${exp ? `, with ${exp} of experience requested` : ""}${education ? ` and ${education} as the stated qualification` : ""}.`,
+    roleSummary ? `The role description covers: ${roleSummary}` : "The listing does not include a detailed role description, so candidates should check the application source for day-to-day duties.",
+    responsibilitySummary ? `Listed responsibilities include: ${responsibilitySummary}` : "",
+    requirementSummary ? `Published requirements include: ${requirementSummary}` : "",
+    skills.length ? `Skills named in the listing include ${skills.join(", ")}.` : "",
+    applyHost ? `The application link opens ${applyHost}. Review that source for current instructions and confirm the vacancy before sharing personal information.` : "Review the original listing for application instructions and confirm the vacancy before sharing personal information.",
+  ].filter(Boolean);
   return facts.join(" ");
 }
 
@@ -73,6 +84,11 @@ export default function JobArticle({ job, relatedJobs = [], path }){
   const salary = salaryText(job);
   const target = applyTarget(job);
   const skills = skillsList(job);
+  const eligibility = [
+    ...(experienceText(job) ? [`Experience listed: ${experienceText(job)}`] : []),
+    ...(job.education?.trim() ? [`Qualification listed: ${job.education.trim()}`] : []),
+    ...textLines(job.requirements),
+  ];
   const rows = [
     ["Company or recruiter listed", job.organization],
     ["Job role", job.title],
@@ -98,9 +114,9 @@ export default function JobArticle({ job, relatedJobs = [], path }){
       : <p>Specific responsibilities were not separately stated in the available listing. Review the role description and confirm day-to-day duties with the application source.</p>,
   });
   sections.push({
-    id: "eligibility", title: "Eligibility criteria", content: job.requirements && textLines(job.requirements).length
-      ? <SourceText text={job.requirements} list />
-      : <p>Detailed eligibility criteria were not separately specified in the available listing. Refer to the listed experience and education in the job overview, and confirm any additional requirements with the application source.</p>,
+    id: "eligibility", title: "Eligibility criteria", content: eligibility.length
+      ? <ul className="prose-list">{eligibility.map((item, i) => <li key={`${i}-${item}`}>{item}</li>)}</ul>
+      : <p>Detailed eligibility criteria were not specified in the available listing. Confirm any additional requirements with the application source.</p>,
   });
   sections.push({
     id: "skills-preparation", title: "Required skills and preparation", content: (
@@ -135,9 +151,9 @@ export default function JobArticle({ job, relatedJobs = [], path }){
     ),
   });
   sections.push({
-    id: "about-company", title: `About ${job.organization}`, content: job.aboutCompany && textLines(job.aboutCompany).length
+    id: "about-company", title: "About the listed organization", content: job.aboutCompany && textLines(job.aboutCompany).length
       ? <SourceText text={job.aboutCompany} />
-      : <p>Additional company background is not included in the available listing. Verify the organization and role through the application source.</p>,
+      : <p>Additional background for the listed organization is not included in the available listing. Verify the organization and role through the application source.</p>,
   });
   sections.push({
     id: "selection-process", title: "Selection process", content: (
@@ -159,14 +175,20 @@ export default function JobArticle({ job, relatedJobs = [], path }){
   return (
     <div className="job-article-content">
       <div className="job-follow-links" aria-label="Follow JobKhojo">
-        {WHATSAPP_URL && <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Join the JobKhojo WhatsApp channel"><MessageCircle size={17} aria-hidden="true" /><span>Join our WhatsApp channel</span></a>}
-        {INSTAGRAM_URL && <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Follow JobKhojo on Instagram"><InstagramIcon /><span>Follow on Instagram</span></a>}
+        {WHATSAPP_URL && <a className="social-follow-link social-follow-whatsapp" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Join the JobKhojo WhatsApp channel">
+          <MessageCircle className="social-follow-icon" size={25} aria-hidden="true" />
+          <span className="social-follow-cta">Join WhatsApp Channel</span>
+        </a>}
+        {INSTAGRAM_URL && <a className="social-follow-link social-follow-instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Follow JobKhojo on Instagram">
+          <InstagramIcon />
+          <span className="social-follow-cta">Follow on Instagram</span>
+        </a>}
       </div>
 
       <section className="job-intro" aria-label="Job introduction"><p>{introduction(job)}</p></section>
 
-      <nav className="job-toc" aria-label="On this page">
-        <h2>On this page</h2>
+      <nav className="job-toc" aria-label="Table of contents">
+        <h2><ClipboardList size={19} aria-hidden="true" />Table of contents</h2>
         <ol>{sections.map((section, index) => <li key={section.id}><a href={`#${section.id}`}><span>{index + 1}</span>{section.title}</a></li>)}</ol>
       </nav>
 
