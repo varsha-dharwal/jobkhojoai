@@ -2,12 +2,43 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import api from "../../api/client";
+import { MIN_NOTE_WORDS, wordCount } from "../../lib/jobs";
+
+const NOTE_TEMPLATE = `Who should apply:
+- 
+
+Selection process:
+- 
+
+How to prepare:
+- 
+
+Apply safely:
+- Apply only through the official link above. <company> doesn't charge candidates any fee.
+`;
+
+const JOB_BOARDS = /(^|\.)(linkedin\.com|naukri\.com|indeed\.com|foundit\.in|shine\.com|internshala\.com|glassdoor\.(com|co\.in)|apna\.co|instahyre\.com)$/;
+const BLOCKED = /(^|\.)(teams\.(microsoft|live)\.com|meet\.google\.com|zoom\.us|whatsapp\.com)$|^(forms\.gle|forms\.office\.com|wa\.me|t\.me|telegram\.me)$/;
+const CITY_RE = /^(bengaluru|bangalore|benguluru|hyderabad|pune|chennai|mumbai|noida|gurgaon|gurugram|delhi|new delhi|kolkata|ahmedabad|india|remote)$/i;
+
+function linkCheck(link){
+  let url;
+  try { url = new URL(link); } catch { return null; }
+  const host = url.hostname.replace(/^www\./, "");
+  if (BLOCKED.test(host) || (host === "docs.google.com" && url.pathname.startsWith("/forms"))) {
+    return { level: "error", text: "This is a meeting, form or chat link, not an application page. It will be rejected — use the employer's careers page or the original job post." };
+  }
+  if (JOB_BOARDS.test(host)) {
+    return { level: "warn", text: `This sends people to ${host}. If the company has its own careers page for this role, link that instead — it's safer for applicants and better for Google.` };
+  }
+  return { level: "ok", text: `Applicants will go to ${host}.` };
+}
 
 const empty = {
   title:"", organization:"", logoUrl:"", category:"Full-time", remote:false, location:"Across India",
   salaryMin:"", salaryMax:"", vacancies:"", experience:"", education:"", skills:"",
   startDate:"", lastDate:"", applyLink:"",
-  roleDescription:"", responsibilities:"", requirements:"", aboutCompany:"",
+  roleDescription:"", responsibilities:"", requirements:"", aboutCompany:"", editorNote:"",
 };
 
 function Field({ label, name, type="text", value, onChange, required=false }){
@@ -27,6 +58,12 @@ function TextArea({ label, name, value, onChange, rows=5, hint, required=false }
       <textarea rows={rows} value={value || ""} onChange={e => onChange(name, e.target.value)} required={required} />
     </div>
   );
+}
+
+const NOTICE_COLORS = { error: "var(--color-danger)", warn: "#92400E", ok: "var(--color-text-tertiary)", good: "#166534" };
+
+function Notice({ level, children }){
+  return <p style={{margin:"-8px 0 16px", fontSize:13, color: NOTICE_COLORS[level]}}>{children}</p>;
 }
 
 function FormSection({ title, subtitle, children }){
@@ -58,6 +95,7 @@ function AdminJobFormPage(){
         ...job,
         startDate: job.startDate?.slice(0,10),
         lastDate: job.lastDate?.slice(0,10),
+        editorNote: job.editorNote || "",
       });
     });
   }, [id]);
@@ -66,14 +104,30 @@ function AdminJobFormPage(){
     setForm(f => ({ ...f, [field]: value }));
   }
 
+  const noteWords = wordCount(form.editorNote);
+  const link = linkCheck(form.applyLink);
+  const orgLooksWrong = CITY_RE.test((form.organization || "").trim());
+
+  function insertTemplate(){
+    const company = form.organization?.trim() || "The company";
+    update("editorNote", (form.editorNote ? form.editorNote.trimEnd() + "\n\n" : "") + NOTE_TEMPLATE.replace("<company>", company));
+  }
+
   async function handleSubmit(e){
     e.preventDefault();
     setError("");
     setSaving(true);
+    if (link?.level === "error") {
+      setError(link.text);
+      setSaving(false);
+      return;
+    }
     try {
       let job;
-      if (isEdit) job = (await api.put(`/jobs/${id}`, form)).data;
-      else job = (await api.post("/jobs", form)).data;
+      // Computed by the API, not stored.
+      const { open: _open, closed: _closed, ...body } = form;
+      if (isEdit) job = (await api.put(`/jobs/${id}`, body)).data;
+      else job = (await api.post("/jobs", body)).data;
       setShareLink(`${window.location.origin}/jobs/${job.slug}`);
     } catch (err) {
       setError(err.response?.data?.message || "Couldn't save, please check the fields.");
@@ -115,6 +169,7 @@ function AdminJobFormPage(){
         <FormSection title="Basic Info">
           <Field label="Job Title" name="title" value={form.title} onChange={update} required />
           <Field label="Organization" name="organization" value={form.organization} onChange={update} required />
+          {orgLooksWrong && <Notice level="warn">"{form.organization}" looks like a place, not a company name. Check the Organization field.</Notice>}
           <Field label="Company Logo URL" name="logoUrl" value={form.logoUrl} onChange={update} />
           <p style={{margin:"-10px 0 16px", fontSize:12, color:"var(--color-text-tertiary)"}}>Optional — a full image URL, or a path like /logos/company.png. Leave blank to use an auto-generated initials badge.</p>
 
@@ -166,6 +221,7 @@ function AdminJobFormPage(){
             <Field label="Start Date" name="startDate" type="date" value={form.startDate} onChange={update} />
             <Field label="Last Date" name="lastDate" type="date" value={form.lastDate} onChange={update} />
           </div>
+          <Notice level="ok">A job closes automatically on its Last Date or 45 days after posting, whichever comes first, and admin gets an email reminder 3 days before. Closed jobs stay reachable but say "This job has closed".</Notice>
         </FormSection>
 
         <FormSection title="Role Details" subtitle="This is what job seekers see on the job page — write it like a real listing.">
@@ -207,8 +263,29 @@ function AdminJobFormPage(){
           />
         </FormSection>
 
+        <FormSection
+          title="JobKhojo's note"
+          subtitle={`Your own write-up — the part Google values. Job pages only show up in Google search once this has ${MIN_NOTE_WORDS}+ words. Don't copy text from the job post here.`}
+        >
+          <TextArea
+            label="Note"
+            name="editorNote"
+            value={form.editorNote}
+            onChange={update}
+            rows={10}
+            hint={`Write from what you know: who this suits (degree, batch, skills), the company's usual selection rounds, what to revise, and any warning signs. Lines ending in ":" become headings; lines starting with "-" become bullet points.`}
+          />
+          <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", gap:12, flexWrap:"wrap", marginTop:-8}}>
+            <span style={{fontSize:13, color: noteWords >= MIN_NOTE_WORDS ? NOTICE_COLORS.good : NOTICE_COLORS.warn}}>
+              {noteWords} words · {noteWords >= MIN_NOTE_WORDS ? "Visible to Google ✓" : `${MIN_NOTE_WORDS - noteWords} more words to show this job in Google`}
+            </span>
+            <button type="button" className="btn btn-ghost" onClick={insertTemplate}>Insert template</button>
+          </div>
+        </FormSection>
+
         <FormSection title="Apply Link">
           <Field label="Official Apply Link" name="applyLink" type="url" value={form.applyLink} onChange={update} required />
+          {link && <Notice level={link.level}>{link.text}</Notice>}
         </FormSection>
 
         {error && <p style={{color:"var(--color-danger)", fontSize:13, marginBottom:12}}>{error}</p>}

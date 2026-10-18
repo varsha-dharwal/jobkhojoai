@@ -9,6 +9,7 @@ import TemplateChooser from "../components/resume-builder/TemplateChooser";
 import LivePreview from "../components/resume-builder/LivePreview";
 import ResumeScore from "../components/resume-builder/ResumeScore";
 import AuthModal from "../components/resume-builder/AuthModal";
+import ResumeGuide from "../components/resume-builder/ResumeGuide";
 import PersonalStep from "../components/resume-builder/steps/PersonalStep";
 import EducationStep from "../components/resume-builder/steps/EducationStep";
 import SkillsStep from "../components/resume-builder/steps/SkillsStep";
@@ -205,13 +206,14 @@ export default function ResumeBuilder() {
   return (
     <main className="container guide-page">
       <SEO
-        title="Free ATS Resume Builder for Freshers | jobkhojoAI"
+        title="Free ATS Resume Builder for Freshers | JobKhojo"
         description="Build your first ATS-friendly resume for free. Step-by-step guidance for freshers and students, a resume readiness check, and a free PDF download — no login required."
         path="/career-guide/resume-builder"
       />
       <ResumeProvider>
         <BuilderInner />
       </ResumeProvider>
+      <ResumeGuide />
     </main>
   );
 }

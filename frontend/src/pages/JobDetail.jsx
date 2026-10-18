@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLoaderData } from "react-router";
 import {
   ArrowUpRight, Share2, Check, MapPin, Briefcase, Clock, Wallet,
-  CalendarDays, Globe, Laptop, Route as RouteIcon, ChevronRight,
+  CalendarDays, CalendarX, Globe, Laptop, Route as RouteIcon, ChevronRight, Building2, PenLine,
 } from "lucide-react";
 import SEO, { JsonLd } from "../components/SEO";
 import CompanyAvatar from "../components/CompanyAvatar";
@@ -14,10 +14,11 @@ import JobArticle from "../components/JobArticle";
 import { JOB_ARTICLE_AUTHOR } from "../lib/site";
 import { fetchAllJobs, fetchJob, toListJob } from "../lib/api";
 import {
-  applyTarget, experienceText, formatDate, jobPostingSchema, jobTypeLabel, locationLabel, postedLabel,
-  relatedPathSlug, salaryText, similarJobs, textLines, workMode,
+  applyTarget, experienceText, formatDate, isIndexableJob, jobPostingSchema, jobTypeLabel, locationLabel,
+  noteBlocks, postedLabel, relatedPathSlug, salaryText, similarJobs, textLines, wasUpdated, workMode,
 } from "../lib/jobs";
 import { ROADMAPS } from "../data/roadmaps";
+import { companyGuideForJob } from "../lib/content";
 
 // Build time: every active job is pre-rendered with its similar jobs.
 export async function loader({ params }){
@@ -109,6 +110,41 @@ function publicationTime(date){
   return new Intl.DateTimeFormat("en-IN", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }).format(new Date(date));
 }
 
+// JobKhojo's own write-up on the job: the original part of the page.
+function EditorNote({ job }){
+  const blocks = noteBlocks(job.editorNote);
+  if (!blocks.length) return null;
+  return (
+    <section className="job-section editor-note" aria-labelledby="editor-note">
+      <h2 id="editor-note"><PenLine size={18} aria-hidden="true" /> JobKhojo's note on this job</h2>
+      <p className="editor-note-meta">
+        Written by {JOB_ARTICLE_AUTHOR.name}
+        {wasUpdated(job) && <> · <span suppressHydrationWarning>Updated {formatDate(job.updatedAt)}</span></>}
+      </p>
+      <div className="prose">
+        {blocks.map((b, i) => b.type === "heading"
+          ? <h3 key={i}>{b.text}</h3>
+          : b.type === "list"
+            ? <ul key={i} className="prose-list">{b.items.map((item, j) => <li key={j}>{item}</li>)}</ul>
+            : <p key={i}>{b.text}</p>)}
+      </div>
+    </section>
+  );
+}
+
+function ClosedNotice({ job }){
+  return (
+    <section className="callout closed-notice" aria-labelledby="closed-heading">
+      <h2 id="closed-heading"><CalendarX size={18} aria-hidden="true" /> This job has closed</h2>
+      <p>
+        {job.lastDate ? <>Applications closed on <span suppressHydrationWarning>{formatDate(job.lastDate)}</span>. </> : "This listing is no longer accepting applications. "}
+        The details below are kept for reference. Similar roles that are still open are listed further down.
+      </p>
+      <Link to="/jobs" className="btn btn-primary">Browse open jobs</Link>
+    </section>
+  );
+}
+
 function Unavailable({ failed }){
   return (
     <main className="container status-page">
@@ -132,10 +168,12 @@ export default function JobDetail(){
   const { job, similar, failed, path } = useLoaderData();
 
   // Keep the floating "Ask" button clear of the mobile sticky apply bar.
+  const showApplyBar = !!job && !job.closed;
   useEffect(() => {
+    if (!showApplyBar) return;
     document.documentElement.classList.add("has-apply-bar");
     return () => document.documentElement.classList.remove("has-apply-bar");
-  }, []);
+  }, [showApplyBar]);
 
   if (!job) return <Unavailable failed={failed} />;
 
@@ -147,6 +185,10 @@ export default function JobDetail(){
   const validCreatedAt = job.createdAt && !Number.isNaN(new Date(job.createdAt).getTime());
   const publishedDate = validCreatedAt ? formatDate(job.createdAt) : "";
   const publishedTime = validCreatedAt ? publicationTime(job.createdAt) : "";
+  const closed = !!job.closed;
+  // Only jobs with JobKhojo's own note are offered to search engines.
+  const indexable = isIndexableJob(job);
+  const companyPage = companyGuideForJob(job);
 
   return (
     <main className="container job-page">
@@ -155,8 +197,9 @@ export default function JobDetail(){
         description={(descriptionText || `${job.title} at ${job.organization}, ${location}. ${jobTypeLabel(job)}${exp ? `, ${exp}` : ""}.`).slice(0, 158)}
         path={`/jobs/${job.slug}`}
         type="article"
+        noindex={!indexable}
       />
-      <JsonLd data={jobPostingSchema(job)} />
+      {indexable && <JsonLd data={jobPostingSchema(job)} />}
       <JsonLd data={{
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
@@ -192,10 +235,14 @@ export default function JobDetail(){
               </ul>
               {(publishedDate || job.lastDate) && <p className="job-header-posted" suppressHydrationWarning>
                 {publishedDate && <><Clock size={14} aria-hidden="true" /> {postedLabel(job.createdAt)}</>}
-                {job.lastDate && <>{publishedDate ? " | " : ""}Apply by {formatDate(job.lastDate)}</>}
+                {wasUpdated(job) && <> | Updated {formatDate(job.updatedAt)}</>}
+                {job.lastDate && !closed && <>{publishedDate ? " | " : ""}Apply by {formatDate(job.lastDate)}</>}
               </p>}
             </div>
           </header>
+
+          {closed && <ClosedNotice job={job} />}
+          <EditorNote job={job} />
 
           <JobArticle job={job} relatedJobs={similar} path={path} />
 
@@ -205,19 +252,23 @@ export default function JobDetail(){
         </article>
 
         <aside className="job-aside">
-          <section className="panel job-action-panel" aria-label="Job actions">
-            <ApplyButton job={job} />
-            <div className="job-action-secondary">
-              <SaveJobButton job={job} />
-              <ShareButton job={job} />
-            </div>
-            {target.note && <p className="apply-note">{target.note} JobKhojo doesn't collect applications.</p>}
-          </section>
+          {!closed && (
+            <section className="panel job-action-panel" aria-label="Job actions">
+              <ApplyButton job={job} />
+              <div className="job-action-secondary">
+                <SaveJobButton job={job} />
+                <ShareButton job={job} />
+              </div>
+              {target.note && <p className="apply-note">{target.note} JobKhojo doesn't collect applications.</p>}
+            </section>
+          )}
 
           <section className="panel job-overview-panel" aria-labelledby="overview-heading">
             <h2 id="overview-heading">Job overview</h2>
             <dl className="facts">
               <Fact icon={CalendarDays} label="Posted">{publishedDate ? <span suppressHydrationWarning>{publishedDate}</span> : null}</Fact>
+              <Fact icon={CalendarDays} label="Updated">{wasUpdated(job) ? <span suppressHydrationWarning>{formatDate(job.updatedAt)}</span> : null}</Fact>
+              {closed && <Fact icon={CalendarX} label="Status">Closed</Fact>}
               <Fact icon={Briefcase} label="Job type">{jobTypeLabel(job)}</Fact>
               <Fact icon={Laptop} label="Work mode">{workMode(job)}</Fact>
               <Fact icon={MapPin} label="Location">{location}</Fact>
@@ -225,6 +276,14 @@ export default function JobDetail(){
               <Fact icon={Globe} label="Apply at">{target.host}</Fact>
             </dl>
           </section>
+
+          {companyPage && (
+            <section className="panel panel-path" aria-labelledby="company-guide-heading">
+              <h2 id="company-guide-heading"><Building2 size={18} aria-hidden="true" /> How {companyPage.name} hires</h2>
+              <p>Eligibility, selection rounds and how to prepare, in our {companyPage.name} hiring guide.</p>
+              <Link to={`/companies/${companyPage.slug}`} className="link-arrow">Read the {companyPage.name} guide →</Link>
+            </section>
+          )}
 
           {path && (
             <section className="panel panel-path" aria-labelledby="path-heading">
@@ -243,7 +302,7 @@ export default function JobDetail(){
       {similar.length > 0 && (
         <section className="section" aria-labelledby="similar-heading">
           <div className="section-head section-head-row">
-            <h2 id="similar-heading">Similar jobs</h2>
+            <h2 id="similar-heading">{closed ? "Similar jobs that are still open" : "Similar jobs"}</h2>
             <Link to="/jobs" className="link-arrow">All jobs →</Link>
           </div>
           <div className="job-list">
@@ -252,13 +311,15 @@ export default function JobDetail(){
         </section>
       )}
 
-      <div className="apply-bar">
-        <div className="apply-bar-text">
-          <strong>{job.title}</strong>
-          <span>{job.organization}</span>
+      {!closed && (
+        <div className="apply-bar">
+          <div className="apply-bar-text">
+            <strong>{job.title}</strong>
+            <span>{job.organization}</span>
+          </div>
+          <ApplyButton job={job} />
         </div>
-        <ApplyButton job={job} />
-      </div>
+      )}
     </main>
   );
 }

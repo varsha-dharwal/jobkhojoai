@@ -21,6 +21,9 @@ const jobSchema = new mongoose.Schema(
     responsibilities: { type: String },
     requirements: { type: String },
     aboutCompany: { type: String },
+    // JobKhojo's own write-up (who should apply, selection process, how to prepare).
+    // Job pages are only indexed by search engines once this is filled in.
+    editorNote: { type: String, default: "" },
     slug: { type: String, required: true, unique: true },
     status: { type: String, enum: ["active", "expired"], default: "active" },
     expiryReminderFor: { type: Date, default: null },

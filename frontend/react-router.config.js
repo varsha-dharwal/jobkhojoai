@@ -1,5 +1,6 @@
 import { ROADMAP_CATEGORIES } from "./src/data/roadmaps.js";
 import { CAREER_GUIDE_ARTICLES } from "./src/data/careerGuides.js";
+import { contentSlugs } from "./scripts/contentIndex.js";
 
 const API_URL = (process.env.VITE_API_URL || "https://jobkhojoai-backend.onrender.com/api").replace(/\/$/, "");
 
@@ -29,6 +30,8 @@ export default {
   ssr: false,
   async prerender() {
     const jobPaths = await fetchJobSlugs();
+    const longGuides = contentSlugs("guides");
+    const companies = contentSlugs("companies");
     return [
       "/",
       "/jobs",
@@ -37,7 +40,8 @@ export default {
       "/career-paths",
       ...ROADMAP_CATEGORIES.map(r => `/roadmap/${r.slug}`),
       "/career-insights",
-      ...CAREER_GUIDE_ARTICLES.map(a => `/career-guide/${a.slug}`),
+      ...[...new Set([...CAREER_GUIDE_ARTICLES.map(a => a.slug), ...longGuides])].map(slug => `/career-guide/${slug}`),
+      ...(companies.length ? ["/companies", ...companies.map(slug => `/companies/${slug}`)] : []),
       "/career-guide/interview-tips",
       "/career-guide/resume-builder",
       "/about",
@@ -48,6 +52,7 @@ export default {
       "/editorial-policy",
       "/job-verification-policy",
       "/content-correction-policy",
+      "/sitemap",
       // Rendered through the catch-all route; postbuild turns it into a static 404.html.
       "/404",
     ];
