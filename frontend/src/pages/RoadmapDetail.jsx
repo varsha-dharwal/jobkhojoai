@@ -6,6 +6,7 @@ import FAQSection from "../components/FAQSection";
 import JobCard from "../components/JobCard";
 import AdSlot from "../components/AdSlot";
 import SEO, { JsonLd } from "../components/SEO";
+import AuthorByline from "../components/AuthorByline";
 import NotFound from "./NotFound";
 import { ROADMAPS } from "../data/roadmaps";
 import { AD_SLOTS } from "../config/adsense";
@@ -82,7 +83,7 @@ export default function RoadmapDetail(){
         <p className="eyebrow eyebrow-teal">Career path</p>
         <h1>{roadmap.title}</h1>
         <p className="lead">{roadmap.tagline.replace(/`/g, "")}</p>
-        <p className="doc-updated">{learningSteps.length} learning stages{projectTiers ? " · project ideas" : ""}</p>
+        <AuthorByline author={roadmap.author} updated={roadmap.updated} extra={`${learningSteps.length} learning stages${projectTiers ? " · project ideas" : ""}`} />
       </header>
 
       <div className="path-layout">

@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { Mail } from "lucide-react";
 import Logo from "./Logo";
 import { CONTACT_EMAIL, INSTAGRAM_HANDLE, INSTAGRAM_URL } from "../lib/site";
+import { COMPANY_GUIDES } from "../lib/content";
 
 const COLUMNS = [
   {
@@ -19,6 +20,7 @@ const COLUMNS = [
     links: [
       { to: "/career-paths", label: "Career paths" },
       { to: "/career-insights", label: "Career guides" },
+      ...(COMPANY_GUIDES.length ? [{ to: "/companies", label: "Company hiring guides" }] : []),
       { to: "/career-guide/resume-builder", label: "Resume builder" },
       { to: "/career-guide/interview-tips", label: "Interview preparation" },
     ],
@@ -39,6 +41,7 @@ const COLUMNS = [
       { to: "/privacy-policy", label: "Privacy policy" },
       { to: "/terms", label: "Terms of use" },
       { to: "/disclaimer", label: "Disclaimer" },
+      { to: "/sitemap", label: "Sitemap" },
     ],
   },
 ];

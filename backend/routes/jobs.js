@@ -1,7 +1,7 @@
 import express from "express";
 import Job from "../models/Job.js";
 import { requireAdmin } from "../middleware/auth.js";
-import { publicJobFilter } from "../utils/publicJobs.js";
+import { publicJobFilter, isJobOpen, defaultLastDate } from "../utils/publicJobs.js";
 import { validateJob } from "../utils/jobValidation.js";
 
 const router = express.Router();
@@ -55,13 +55,14 @@ router.get("/meta/companies", async (req, res) => {
   }
 });
 
-// GET /api/jobs/:slug
+// GET /api/jobs/:slug -> closed jobs are returned too, flagged `closed: true`, so
+// their page can say the job has closed instead of showing a 404.
 router.get("/:slug", async (req, res) => {
   try {
-    const job = await Job.findOne(publicJobFilter({ slug: req.params.slug }));
+    const job = await Job.findOne({ slug: req.params.slug });
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=600");
-    res.json(job);
+    res.json({ ...job.toObject(), closed: !isJobOpen(job) });
   } catch (err) {
     res.status(500).json({ message: "Could not load job", error: err.message });
   }
@@ -72,7 +73,7 @@ router.get("/:slug", async (req, res) => {
 // GET /api/jobs/admin/all -> everything, including expired
 router.get("/admin/all", requireAdmin, async (req, res) => {
   const jobs = await Job.find().sort({ createdAt: -1 });
-  res.json(jobs);
+  res.json(jobs.map(job => ({ ...job.toObject(), open: isJobOpen(job) })));
 });
 
 // POST /api/jobs
@@ -83,6 +84,7 @@ router.post("/", requireAdmin, async (req, res) => {
     if (validationError) return res.status(400).json({ message: validationError });
     const job = await Job.create({
       ...body,
+      lastDate: body.lastDate || defaultLastDate(),
       slug: makeSlug(body.title, body.organization),
     });
     res.status(201).json(job);
@@ -96,7 +98,8 @@ router.put("/:id", requireAdmin, async (req, res) => {
   try {
     const existing = await Job.findById(req.params.id);
     if (!existing) return res.status(404).json({ message: "Job not found" });
-    const contentFields = ["title", "organization", "roleDescription", "applyLink"];
+    if (req.body.lastDate === "") req.body.lastDate = null;
+    const contentFields = ["title", "organization", "roleDescription", "applyLink", "lastDate"];
     if (contentFields.some(field => Object.hasOwn(req.body, field))) {
       const validationError = validateJob({ ...existing.toObject(), ...req.body });
       if (validationError) return res.status(400).json({ message: validationError });
