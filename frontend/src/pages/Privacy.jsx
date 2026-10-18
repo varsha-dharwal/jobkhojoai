@@ -8,6 +8,7 @@ const sections = [
     list: [
       "You can browse jobs and guides without an account.",
       "If you create an account, we store your name, email address and a secure hash of your password, plus any resume draft you choose to save.",
+      "If you opt in to daily job alerts, we store your email address after verification and use it to send new job listings. You can unsubscribe from any alert email.",
       "Saved jobs and unsaved resume drafts stay in your own browser (local storage) unless you sign in and save them.",
       "Text you send to our AI features is processed by Google's Gemini API to generate a reply.",
       "Advertising on this site is provided by Google AdSense, which may use cookies.",
@@ -19,6 +20,7 @@ const sections = [
     heading: "Information we collect",
     paragraphs: [
       "Account information: when you sign up (currently used for the resume builder) we collect your name and email address. Your password is stored only as a one-way hash, never as plain text.",
+      "Job alerts: if you choose Yes on an apply prompt, we verify your email with a one-time code or Google sign-in before subscribing you. We store the verified email, subscription choice and verification/consent timestamps. We don't add you to job alerts unless you complete verification.",
       "Content you create: resume details you enter in the resume builder. These are kept in your browser while you work and are saved to your account only when you're signed in.",
       "Messages to AI features: questions you type into “Ask” and text you submit to resume suggestions, together with the context needed to answer (for example a target role or a list of current job titles).",
       "Technical information: like most websites, our hosting providers automatically process standard request data such as IP address, browser type and the pages requested, in order to deliver the site and protect it from abuse.",
@@ -30,6 +32,7 @@ const sections = [
     list: [
       "To provide the features you use — for example, saving and restoring your resume draft.",
       "To answer questions you ask through AI features.",
+      "To send daily email updates about newly listed jobs when you have verified your email and opted in.",
       "To keep the site secure, prevent misuse and fix problems.",
       "To respond when you contact us.",
     ],
@@ -56,6 +59,7 @@ const sections = [
     heading: "Who we share information with",
     paragraphs: [
       "We use service providers to run JobKhojo: website hosting and delivery, our application server, our database provider, and Google (for AI features and advertising). They process information only to provide their services to us. We may also disclose information if required by law.",
+      "Job alert email addresses and message delivery are handled by our email delivery provider. Google sign-in is used only to verify the email address you choose for alerts.",
       "When you click an apply button you leave JobKhojo. Whatever you submit on the employer's site or a job board is governed by their privacy policy, not ours.",
     ],
   },
@@ -63,7 +67,7 @@ const sections = [
     id: "retention",
     heading: "How long we keep it",
     paragraphs: [
-      "We keep account information and saved resume drafts until you delete them or ask us to delete your account. Messages to AI features are not stored in your account.",
+      "We keep account information and saved resume drafts until you delete them or ask us to delete your account. Job alert details are kept while you remain subscribed; you can unsubscribe at any time. Messages to AI features are not stored in your account.",
     ],
   },
   {

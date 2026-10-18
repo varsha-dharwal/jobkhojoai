@@ -1,10 +1,14 @@
+import { JOB_ARTICLE_AUTHOR } from "../lib/site";
+
 // People credited on guides, roadmaps and job notes. Shown in bylines and on /about.
+// Varsha's name and bio come from lib/site.js, the same details her job pages use.
 export const AUTHORS = {
   varsha: {
     id: "varsha",
-    name: "Varsha",
+    name: JOB_ARTICLE_AUTHOR.name,
     role: "Editor, JobKhojo",
-    bio: "Varsha runs JobKhojo: adding and checking job listings, and writing and editing the career guides. The focus is on what freshers and early-career candidates in India need to know before they apply.",
+    bio: JOB_ARTICLE_AUTHOR.description,
+    photo: "/images/varsha-dharwal-96.webp",
   },
 };
 

@@ -94,7 +94,7 @@ function AdminJobsPage(){
       {!loading && (
         <p style={{fontSize:14, color:"var(--color-text-secondary)", margin:"0 0 16px"}}>
           {counts.visible} of {jobs.length - counts.closed} open jobs are visible in Google search. A job shows up there once its
-          JobKhojo note has {MIN_NOTE_WORDS}+ words. Jobs close 30 days after posting unless they have a later Last Date.
+          JobKhojo note has {MIN_NOTE_WORDS}+ words. Jobs close on their Last Date or 45 days after posting, whichever comes first.
         </p>
       )}
 

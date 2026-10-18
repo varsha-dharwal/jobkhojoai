@@ -5,8 +5,7 @@ import Logo from "./Logo";
 import { getSavedJobs, onSavedJobsChange } from "../utils/savedJobs";
 
 const NAV = [
-  { to: "/jobs", label: "Jobs", isActive: (p, s) => p.startsWith("/jobs") && !/type=internship/.test(s) },
-  { to: "/jobs?type=internship", label: "Internships", isActive: (p, s) => p === "/jobs" && /type=internship/.test(s) },
+  { to: "/jobs", label: "Jobs", isActive: p => p.startsWith("/jobs") },
   { to: "/career-paths", label: "Career paths", isActive: p => p.startsWith("/career-paths") || p.startsWith("/roadmap") },
   { to: "/career-insights", label: "Guides", isActive: p => p.startsWith("/career-insights") || (p.startsWith("/career-guide") && !p.endsWith("resume-builder")) },
 ];

@@ -221,7 +221,7 @@ function AdminJobFormPage(){
             <Field label="Start Date" name="startDate" type="date" value={form.startDate} onChange={update} />
             <Field label="Last Date" name="lastDate" type="date" value={form.lastDate} onChange={update} />
           </div>
-          <Notice level="ok">Leave Last Date empty and the job closes automatically 30 days after it was posted. Closed jobs stay reachable but say "This job has closed".</Notice>
+          <Notice level="ok">A job closes automatically on its Last Date or 45 days after posting, whichever comes first, and admin gets an email reminder 3 days before. Closed jobs stay reachable but say "This job has closed".</Notice>
         </FormSection>
 
         <FormSection title="Role Details" subtitle="This is what job seekers see on the job page — write it like a real listing.">

@@ -26,6 +26,7 @@ const jobSchema = new mongoose.Schema(
     editorNote: { type: String, default: "" },
     slug: { type: String, required: true, unique: true },
     status: { type: String, enum: ["active", "expired"], default: "active" },
+    expiryReminderFor: { type: Date, default: null },
   },
   { timestamps: true }
 );
