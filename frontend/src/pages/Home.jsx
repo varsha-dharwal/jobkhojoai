@@ -1,11 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Form, Link, useLoaderData, useLocation, useNavigate } from "react-router";
 import {
   ArrowRight, Search, MapPin, ChevronRight, CircleCheck, Link2, ShieldCheck,
   FileText, SquareArrowOutUpRight, Code2, Server, Layers, BarChart3, Palette, Cloud,
 } from "lucide-react";
 import SEO, { JsonLd, SITE_URL } from "../components/SEO";
-import { fetchAllJobs, toListJob } from "../lib/api";
+import { fetchAllJobs, fetchCurrentJobs, toListJob } from "../lib/api";
 import { experienceLevel, isRemote } from "../lib/jobs";
 import { guideMeta, readingMinutes } from "../lib/guides";
 import { ROADMAPS } from "../data/roadmaps";
@@ -15,25 +15,29 @@ import { legacyJobsUrl } from "../lib/jobFilters";
 const FEATURED_PATHS = ["frontend", "backend", "full-stack", "data-science"];
 const FEATURED_GUIDES = ["resume-guide-for-it-freshers", "how-to-spot-fake-job-posts", "internship-application-guide"];
 
-// Runs at build time; every number on the page is counted from the real listings.
+function makeJobSections(jobs){
+  const newestJobs = jobs.map(toListJob).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return [
+    {
+      key: "tech", title: "Tech Jobs", to: "/jobs",
+      listings: newestJobs.filter(j => /software|developer|engineer|data|\bit\b|web|cloud|ai|machine learning|qa|tester|security|technical|javascript|react|python|java/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10),
+    },
+    { key: "remote", title: "Remote Jobs", to: "/jobs?mode=remote", listings: newestJobs.filter(isRemote).slice(0, 10) },
+    { key: "fresher", title: "Fresher & Internships", to: "/jobs?exp=fresher", listings: newestJobs.filter(j => experienceLevel(j) === "fresher" || j.category === "Internship").slice(0, 10) },
+    {
+      key: "tech-news", title: "AI & Latest Tech News", to: "/career-insights", isArticle: true,
+      listings: CAREER_GUIDE_ARTICLES.filter(a => /ai|tech|developer|react|javascript|software|portfolio/i.test(`${a.title} ${a.summary}`)).slice(0, 10),
+    },
+    { key: "walk-in", title: "Walk-In Interviews", to: "/jobs?q=walk", listings: newestJobs.filter(j => /walk[\s-]?in/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10) },
+    { key: "international", title: "International Jobs", to: "/jobs?region=usa", listings: newestJobs.filter(j => /\b(united states|usa|u\.s\.?a?\.?)\b/i.test(j.location || "")).slice(0, 10) },
+  ];
+}
+
+// The build-time data supplies the pre-rendered page; the browser refreshes it on each visit.
 export async function loader(){
   const jobs = await fetchAllJobs();
-  const newestJobs = jobs.map(toListJob).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   return {
-    jobSections: [
-      {
-        key: "tech", title: "Tech Jobs", to: "/jobs",
-        listings: newestJobs.filter(j => /software|developer|engineer|data|\bit\b|web|cloud|ai|machine learning|qa|tester|security|technical|javascript|react|python|java/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10),
-      },
-      { key: "remote", title: "Remote Jobs", to: "/jobs?mode=remote", listings: newestJobs.filter(isRemote).slice(0, 10) },
-      { key: "fresher", title: "Fresher & Internships", to: "/jobs?exp=fresher", listings: newestJobs.filter(j => experienceLevel(j) === "fresher" || j.category === "Internship").slice(0, 10) },
-      {
-        key: "tech-news", title: "AI & Latest Tech News", to: "/career-insights", isArticle: true,
-        listings: CAREER_GUIDE_ARTICLES.filter(a => /ai|tech|developer|react|javascript|software|portfolio/i.test(`${a.title} ${a.summary}`)).slice(0, 10),
-      },
-      { key: "walk-in", title: "Walk-In Interviews", to: "/jobs?q=walk", listings: newestJobs.filter(j => /walk[\s-]?in/i.test(`${j.title || ""} ${j.skills || ""}`)).slice(0, 10) },
-      { key: "international", title: "International Jobs", to: "/jobs?region=usa", listings: newestJobs.filter(j => /\b(united states|usa|u\.s\.?a?\.?)\b/i.test(j.location || "")).slice(0, 10) },
-    ],
+    jobSections: makeJobSections(jobs),
     total: jobs.length,
     paths: FEATURED_PATHS.filter(slug => ROADMAPS[slug]).map(slug => ({ slug, title: ROADMAPS[slug].title, steps: ROADMAPS[slug].steps.length })),
     guides: FEATURED_GUIDES
@@ -84,9 +88,24 @@ function SectionHead({ id, title, subtitle, link }){
 }
 
 export default function Home(){
-  const { jobSections, total, paths, guides } = useLoaderData();
+  const { jobSections: prerenderedSections, total: prerenderedTotal, paths, guides } = useLoaderData();
+  const [liveListing, setLiveListing] = useState({ jobSections: prerenderedSections, total: prerenderedTotal });
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isCurrent = true;
+    fetchCurrentJobs()
+      .then(jobs => {
+        if (isCurrent) setLiveListing({ jobSections: makeJobSections(jobs), total: jobs.length });
+      })
+      .catch(() => {
+        // Keep the pre-rendered listings visible if the live API is temporarily unavailable.
+      });
+    return () => { isCurrent = false; };
+  }, []);
+
+  const { jobSections, total } = liveListing;
 
   // Old links pointed at "/?search=…#jobs" and "/#roadmaps" — send them to the new pages.
   useEffect(() => {

@@ -23,6 +23,7 @@ const jobSchema = new mongoose.Schema(
     aboutCompany: { type: String },
     slug: { type: String, required: true, unique: true },
     status: { type: String, enum: ["active", "expired"], default: "active" },
+    expiryReminderFor: { type: Date, default: null },
   },
   { timestamps: true }
 );

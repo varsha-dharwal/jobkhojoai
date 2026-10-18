@@ -7,5 +7,5 @@ export const WHATSAPP_URL = "https://whatsapp.com/channel/0029VbE0Ndp9WtBuxwj8Kh
 
 export const JOB_ARTICLE_AUTHOR = {
   name: "Varsha Dharwal",
-  description: "Varsha Dharwal is a full-stack developer and content writer with approximately 2–3 years of professional experience in the IT industry. She contributes practical career resources and job-related content to help candidates understand opportunities, prepare for applications, and navigate their career journeys.",
+  description: "Varsha Dharwal has experience in full-stack development and content writing. She contributes practical career resources and job-related content to help candidates understand opportunities, prepare for applications, and navigate their career journeys.",
 };

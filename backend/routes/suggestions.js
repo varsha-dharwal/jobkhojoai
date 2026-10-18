@@ -18,7 +18,7 @@ async function sendSuggestionEmail({ email, suggestion }){
     method: "POST",
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.MAIL_FROM || "JobKhojo <jobs@jobkhojoai.com>",
+      from: process.env.MAIL_FROM || "hello@jobkhojoai.com",
       to: ["hello@jobkhojoai.com"],
       subject: "New job post suggestion for JobKhojo",
       reply_to: email,
