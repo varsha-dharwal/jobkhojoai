@@ -54,6 +54,9 @@ the free backend is asleep.
 
 - A job posted after the last build still opens: `jobs/404.html` boots the app and loads it from the API.
   It gets its own static page on the next build.
+- The homepage keeps its pre-rendered content visible, then fetches the current jobs list from the API when
+  opened or refreshed. New jobs appear in matching Explore opportunities categories without waiting for a
+  frontend rebuild.
 - `scripts/postbuild.js` writes clean URLs (`about.html` is served at `/about`), the static `404.html` and
   `sitemap.xml`.
 - A production build fails if the API can't be reached, so a deploy never ships without jobs.
@@ -88,6 +91,15 @@ environment. The backend sends a six-digit email code and emails newly posted ac
 To enable Google sign-in, set the same Google Identity Services web client ID as `GOOGLE_CLIENT_ID` in the
 backend and `VITE_GOOGLE_CLIENT_ID` in the frontend build environment. Without these provider settings, the
 apply prompt still works, but the matching sign-in/email delivery option is unavailable.
+
+### Job expiry and admin reminders
+
+Active jobs expire automatically at the earlier of their application `lastDate` or 45 days after posting.
+The `lastDate` is treated as inclusive through its calendar day. The backend checks at startup and daily at
+`DIGEST_HOUR` in `DIGEST_TIME_ZONE` (defaults to 09:00 Asia/Kolkata), and marks expired jobs so they disappear
+from public listings. It emails `ADMIN_EMAIL` once when a job is within 3 days of its expiry. This reminder
+uses the same `RESEND_API_KEY` and `MAIL_FROM` settings as daily job alerts; if email delivery is not configured,
+jobs still expire but reminders are skipped and a server warning is logged.
 
 ## Notes
 

@@ -9,14 +9,14 @@ const hash = (value) => createHash("sha256").update(value).digest("hex");
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "868093988992-qj56h39hgj75oo8euq56s2bduif4vpco.apps.googleusercontent.com";
 
 async function sendMail({ to, subject, html, text }) {
-  const missing = [!process.env.RESEND_API_KEY && "RESEND_API_KEY", !process.env.MAIL_FROM && "MAIL_FROM"].filter(Boolean);
+  const missing = [!process.env.RESEND_API_KEY && "RESEND_API_KEY"].filter(Boolean);
   if (missing.length) {
     throw new Error(`Email delivery setup is incomplete on the server (${missing.join(", ")}). Please contact the site administrator.`);
   }
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: process.env.MAIL_FROM, to: [to], subject, html, text }),
+    body: JSON.stringify({ from: process.env.MAIL_FROM || "hello@jobkhojoai.com", to: [to], subject, html, text }),
   });
   if (!response.ok) {
     const providerError = await response.text().catch(() => "");
@@ -124,7 +124,7 @@ router.get("/unsubscribe/:token", async (req, res) => {
 });
 
 export async function sendDailyJobDigest(){
-  if (!process.env.RESEND_API_KEY || !process.env.MAIL_FROM) return;
+  if (!process.env.RESEND_API_KEY) return;
   const now = new Date();
   const jobs = await (await import("../models/Job.js")).default.find({ status: "active", createdAt: { $gte: new Date(now.getTime() - 24 * 60 * 60_000), $lte: now } }).sort({ createdAt: -1 }).limit(30).lean();
   if (!jobs.length) return;
