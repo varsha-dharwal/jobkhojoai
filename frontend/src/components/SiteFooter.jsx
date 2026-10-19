@@ -4,6 +4,7 @@ import { ArrowRight, BellRing, CheckCircle2, Mail, ShieldCheck } from "lucide-re
 import Logo from "./Logo";
 import { CONTACT_EMAIL, INSTAGRAM_HANDLE, INSTAGRAM_URL, WHATSAPP_URL } from "../lib/site";
 import { API_BASE } from "../lib/api";
+import { COMPANY_GUIDES } from "../lib/content";
 
 const COLUMNS = [
   {
@@ -21,6 +22,7 @@ const COLUMNS = [
     links: [
       { to: "/career-paths", label: "Career paths" },
       { to: "/career-insights", label: "Career guides" },
+      ...(COMPANY_GUIDES.length ? [{ to: "/companies", label: "Company hiring guides" }] : []),
       { to: "/career-guide/resume-builder", label: "Resume builder" },
       { to: "/career-guide/interview-tips", label: "Interview preparation" },
     ],
@@ -41,6 +43,7 @@ const COLUMNS = [
       { to: "/privacy-policy", label: "Privacy policy" },
       { to: "/terms", label: "Terms of use" },
       { to: "/disclaimer", label: "Disclaimer" },
+      { to: "/sitemap", label: "Sitemap" },
     ],
   },
 ];

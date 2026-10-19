@@ -59,8 +59,8 @@ const pages = walk(root)
     const html = readFileSync(file, "utf8");
     if (/<meta name="robots" content="noindex/.test(html)) return null;
     const loc = rel === "index.html" ? "/" : `/${rel.replace(/\.html$/, "")}`;
-    const posted = html.match(/"datePosted":"([^"]+)"/)?.[1];
-    return { loc, lastmod: posted ? posted.slice(0, 10) : null };
+    const changed = html.match(/"dateModified":"([^"]+)"/)?.[1] || html.match(/"datePosted":"([^"]+)"/)?.[1];
+    return { loc, lastmod: changed ? changed.slice(0, 10) : null };
   })
   .filter(Boolean)
   .sort((a, b) => (a.loc === "/" ? -1 : b.loc === "/" ? 1 : a.loc.localeCompare(b.loc)));

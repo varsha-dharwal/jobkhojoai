@@ -8,6 +8,10 @@ export function requireAdmin(req, res, next) {
   const token = header.split(" ")[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Site users get tokens signed with the same secret, so check it's the admin's.
+    if (decoded.userId || decoded.email !== process.env.ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
     req.admin = decoded;
     next();
   } catch (err) {

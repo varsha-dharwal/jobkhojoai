@@ -8,6 +8,7 @@ import jobRoutes from "./routes/jobs.js";
 import aiRoutes from "./routes/ai.js";
 import userRoutes from "./routes/users.js";
 import resumeAiRoutes from "./routes/resumeAi.js";
+import contactRoutes from "./routes/contact.js";
 import alertRoutes, { sendDailyJobDigest } from "./routes/alerts.js";
 import suggestionRoutes from "./routes/suggestions.js";
 import { runJobLifecycle } from "./services/jobLifecycle.js";
@@ -59,6 +60,8 @@ app.use(
     credentials: true,
   })
 );
+// Render sits behind a proxy; this makes req.ip the visitor's address (used for rate limits).
+app.set("trust proxy", 1);
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ status: "jobkhojoAI API running" }));
@@ -67,6 +70,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/resume-ai", resumeAiRoutes);
+app.use("/api/contact", contactRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/suggestions", suggestionRoutes);
 

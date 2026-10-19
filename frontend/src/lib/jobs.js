@@ -378,3 +378,43 @@ export function jobPostingSchema(job) {
   if (skills.length) schema.skills = skills.join(", ");
   return schema;
 }
+
+// ---------- JobKhojo notes / indexing ----------
+
+// A job page is shown to search engines only once it carries JobKhojo's own note of
+// at least this many words — the listing details alone are mostly the employer's text.
+export const MIN_NOTE_WORDS = 80;
+
+export function wordCount(text){
+  return (text || "").split(/\s+/).filter(Boolean).length;
+}
+
+export function isIndexableJob(job){
+  return !job.closed && wordCount(job.editorNote) >= MIN_NOTE_WORDS;
+}
+
+// Shown as "Updated …" only when the job was edited at least a day after posting.
+export function wasUpdated(job){
+  return job.updatedAt && new Date(job.updatedAt) - new Date(job.createdAt) > 864e5;
+}
+
+// Splits a note into blocks: short lines ending in ":" become headings, lines starting
+// with "-", "•" or "*" become list items, everything else a paragraph.
+export function noteBlocks(text){
+  const blocks = [];
+  for (const raw of (text || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (/^[-•*]\s+/.test(line)) {
+      const item = line.replace(/^[-•*]\s+/, "");
+      const last = blocks[blocks.length - 1];
+      if (last?.type === "list") last.items.push(item);
+      else blocks.push({ type: "list", items: [item] });
+    } else if (line.endsWith(":") && line.length <= 60) {
+      blocks.push({ type: "heading", text: line.slice(0, -1) });
+    } else {
+      blocks.push({ type: "p", text: line });
+    }
+  }
+  return blocks;
+}
