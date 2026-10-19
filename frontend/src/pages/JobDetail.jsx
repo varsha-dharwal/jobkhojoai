@@ -11,6 +11,7 @@ import JobCard from "../components/JobCard";
 import AdSlot from "../components/AdSlot";
 import { AD_SLOTS } from "../config/adsense";
 import JobArticle from "../components/JobArticle";
+import JobAlertModal from "../components/JobAlertModal";
 import { JOB_ARTICLE_AUTHOR } from "../lib/site";
 import { fetchAllJobs, fetchJob, toListJob } from "../lib/api";
 import {
@@ -96,11 +97,11 @@ function ShareButton({ job }){
   );
 }
 
-function ApplyButton({ job, className = "" }){
+function ApplyButton({ className = "", onClick }){
   return (
-    <a href={job.applyLink} target="_blank" rel="noopener noreferrer nofollow" className={`btn btn-primary btn-lg ${className}`}>
+    <button type="button" onClick={onClick} className={`btn btn-primary btn-lg ${className}`}>
       Apply Here <ArrowUpRight size={18} aria-hidden="true" />
-    </a>
+    </button>
   );
 }
 
@@ -130,6 +131,7 @@ function Unavailable({ failed }){
 
 export default function JobDetail(){
   const { job, similar, failed, path } = useLoaderData();
+  const [showAlertModal, setShowAlertModal] = useState(false);
 
   // Keep the floating "Ask" button clear of the mobile sticky apply bar.
   useEffect(() => {
@@ -206,7 +208,7 @@ export default function JobDetail(){
 
         <aside className="job-aside">
           <section className="panel job-action-panel" aria-label="Job actions">
-            <ApplyButton job={job} />
+            <ApplyButton onClick={() => setShowAlertModal(true)} />
             <div className="job-action-secondary">
               <SaveJobButton job={job} />
               <ShareButton job={job} />
@@ -257,8 +259,9 @@ export default function JobDetail(){
           <strong>{job.title}</strong>
           <span>{job.organization}</span>
         </div>
-        <ApplyButton job={job} />
+        <ApplyButton onClick={() => setShowAlertModal(true)} />
       </div>
+      {showAlertModal && <JobAlertModal onClose={() => setShowAlertModal(false)} onApply={() => window.location.assign(job.applyLink)} />}
     </main>
   );
 }
