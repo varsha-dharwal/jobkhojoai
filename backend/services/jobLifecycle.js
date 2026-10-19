@@ -45,7 +45,7 @@ export async function runJobLifecycle(now = new Date()) {
   for (const job of jobs) {
     const expiry = effectiveExpiry(job);
     if (expiry <= now) {
-      await Job.updateOne({ _id: job._id, status: "active" }, { $set: { status: "expired" } });
+      await Job.updateOne({ _id: job._id, status: "active" }, { $set: { status: "expired" } }, { timestamps: false });
       expired += 1;
       continue;
     }
@@ -82,7 +82,7 @@ export async function runJobLifecycle(now = new Date()) {
   });
 
   for (const { job, expiry } of reminders) {
-    await Job.updateOne({ _id: job._id, status: "active" }, { $set: { expiryReminderFor: expiry } });
+    await Job.updateOne({ _id: job._id, status: "active" }, { $set: { expiryReminderFor: expiry } }, { timestamps: false });
   }
   return { expired, reminded: reminders.length };
 }

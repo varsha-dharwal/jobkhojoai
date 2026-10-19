@@ -1,3 +1,4 @@
+import { DEFAULT_AUTHOR } from "../data/authors";
 import { Link } from "react-router";
 import TrustPage from "./TrustPage";
 import FAQSection from "../components/FAQSection";
@@ -18,6 +19,25 @@ const sections = [
     paragraphs: [
       "Every job on JobKhojo is added by hand by our team. We find openings on company career pages and on public job boards such as LinkedIn, Naukri and Indeed. We then write the listing up in a standard structure — role, responsibilities, requirements, location, experience, skills — based on the employer's original posting.",
       "Each job page says where its apply button leads, for example “Apply on LinkedIn” or “Apply on company site”. We focus on roles in software and IT, design, data, cloud, QA and technical support, plus other entry-level roles at technology and IT services companies.",
+      "Where we can add something useful, a job also carries a JobKhojo note: who the role suits, how that company usually runs its selection rounds, what to revise and anything to watch out for. Those notes are our own writing, not the employer's.",
+    ],
+  },
+  {
+    id: "who-runs-jobkhojo",
+    heading: "Who runs JobKhojo",
+    paragraphs: [
+      `${DEFAULT_AUTHOR.name} runs JobKhojo as its editor. ${DEFAULT_AUTHOR.name} adds and checks the job listings, writes the JobKhojo notes on jobs, and writes and edits the career guides and company hiring guides. Guides carry the author's name and the date they were last updated.`,
+      "We are a small, independent team based in India. JobKhojo is not owned by, or affiliated with, any employer, recruitment agency or job board whose listings we link to.",
+    ],
+  },
+  {
+    id: "what-we-publish",
+    heading: "What we publish besides jobs",
+    list: [
+      "Company hiring guides: eligibility, selection rounds and preparation for large employers that hire freshers in bulk.",
+      "Career guides on resumes, interviews, internships, salaries and staying safe from fake job offers.",
+      "Career paths: what to learn, in order, for twelve tech roles, with project ideas for each stage.",
+      "A free resume builder that works in your browser and exports a PDF.",
     ],
   },
   {
