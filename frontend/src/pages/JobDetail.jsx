@@ -193,6 +193,7 @@ export default function JobDetail(){
   const companyPage = companyGuideForJob(job);
 
   return (
+    <>
     <main className="container job-page">
       <SEO
         title={`${job.title} at ${job.organization} — ${location} | JobKhojo`}
@@ -323,5 +324,6 @@ export default function JobDetail(){
       </div>
       {showAlertModal && <JobAlertModal onClose={() => setShowAlertModal(false)} onApply={() => window.location.assign(job.applyLink)} />}
     </main>
+    </>
   );
 }
