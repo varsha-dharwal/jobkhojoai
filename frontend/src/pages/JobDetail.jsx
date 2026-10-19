@@ -318,10 +318,9 @@ export default function JobDetail(){
             <strong>{job.title}</strong>
             <span>{job.organization}</span>
           </div>
-          <ApplyButton job={job} />
+          <ApplyButton onClick={() => setShowAlertModal(true)} />
         </div>
-        <ApplyButton onClick={() => setShowAlertModal(true)} />
-      </div>
+      )}
       {showAlertModal && <JobAlertModal onClose={() => setShowAlertModal(false)} onApply={() => window.location.assign(job.applyLink)} />}
     </main>
     </>
