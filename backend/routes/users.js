@@ -7,6 +7,7 @@ import { requireUser } from "../middleware/auth.js";
 const router = express.Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "868093988992-qj56h39hgj75oo8euq56s2bduif4vpco.apps.googleusercontent.com";
 
 function signToken(user) {
   return jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: "30d" });
@@ -27,7 +28,9 @@ router.post("/register", async (req, res) => {
 
     res.status(201).json({ token: signToken(user), name: user.name, email: user.email });
   } catch (err) {
-    res.status(500).json({ message: "Could not create account", error: err.message });
+    if (err?.code === 11000) return res.status(409).json({ message: "An account with this email already exists." });
+    console.error("User registration failed:", err);
+    res.status(500).json({ message: "Could not create account. Please try again." });
   }
 });
 
@@ -37,15 +40,57 @@ router.post("/login", async (req, res) => {
     if (!email || !password) return res.status(400).json({ message: "Email and password are required." });
 
     const user = await User.findOne({ email: email.toLowerCase().trim() });
-    if (!user) return res.status(401).json({ message: "Invalid email or password" });
+    if (!user || !user.passwordHash) return res.status(401).json({ message: "Invalid email or password" });
 
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) return res.status(401).json({ message: "Invalid email or password" });
 
     res.json({ token: signToken(user), name: user.name, email: user.email });
   } catch (err) {
-    res.status(500).json({ message: "Could not log in", error: err.message });
+    console.error("User login failed:", err);
+    res.status(500).json({ message: "Could not sign in. Please try again." });
   }
+});
+
+router.post("/google-auth", async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ message: "Google credential is required." });
+
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+    if (!response.ok) return res.status(401).json({ message: "Google sign-in could not be verified. Please try again." });
+    const identity = await response.json();
+    if (identity.aud !== GOOGLE_CLIENT_ID || identity.email_verified !== "true" || !identity.sub || !EMAIL_RE.test(identity.email || "")) {
+      return res.status(401).json({ message: "Use a verified Google account to continue." });
+    }
+
+    const email = identity.email.trim().toLowerCase();
+    let user = await User.findOne({ googleId: identity.sub });
+    if (!user) {
+      user = await User.findOne({ email });
+      if (user) {
+        user.googleId = identity.sub;
+        await user.save();
+      } else {
+        user = await User.create({
+          name: (identity.name || email.split("@")[0]).trim(),
+          email,
+          googleId: identity.sub,
+        });
+      }
+    }
+
+    res.json({ token: signToken(user), name: user.name, email: user.email });
+  } catch (err) {
+    console.error("Google user sign-in failed:", err);
+    res.status(500).json({ message: "Could not sign in with Google. Please try again." });
+  }
+});
+
+router.get("/me", requireUser, async (req, res) => {
+  const user = await User.findById(req.userId).select("name email");
+  if (!user) return res.status(404).json({ message: "Account not found" });
+  res.json({ name: user.name, email: user.email });
 });
 
 router.get("/me/resume", requireUser, async (req, res) => {

@@ -1,29 +1,13 @@
 import express from "express";
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import JobAlertSubscriber from "../models/JobAlertSubscriber.js";
+import { sendEmail } from "../services/emailDelivery.js";
 
 const router = express.Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const hash = (value) => createHash("sha256").update(value).digest("hex");
 // OAuth web client IDs are public identifiers; keep the environment override for other deployments.
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "868093988992-qj56h39hgj75oo8euq56s2bduif4vpco.apps.googleusercontent.com";
-
-async function sendMail({ to, subject, html, text }) {
-  const missing = [!process.env.RESEND_API_KEY && "RESEND_API_KEY"].filter(Boolean);
-  if (missing.length) {
-    throw new Error(`Email delivery setup is incomplete on the server (${missing.join(", ")}). Please contact the site administrator.`);
-  }
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from: process.env.MAIL_FROM || "hello@jobkhojoai.com", to: [to], subject, html, text }),
-  });
-  if (!response.ok) {
-    const providerError = await response.text().catch(() => "");
-    console.error("Resend email request failed:", response.status, providerError.slice(0, 500));
-    throw new Error("Email provider could not send the message. Please try again later.");
-  }
-}
 
 function emailTemplate(jobs, unsubscribeUrl) {
   const lines = jobs.map((job) => `<li style="margin:0 0 18px"><strong>${escapeHtml(job.title)}</strong> at ${escapeHtml(job.organization || "Employer")}<br><a href="${process.env.PUBLIC_SITE_URL || "https://jobkhojoai.com"}/jobs/${encodeURIComponent(job.slug)}">View job</a></li>`).join("");
@@ -56,7 +40,7 @@ router.post("/send-code", async (req, res) => {
     }
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     const expiry = new Date(Date.now() + 10 * 60_000);
-    await sendMail({
+    await sendEmail({
       to: email, subject: "Your JobKhojo verification code",
       html: `<div style="font-family:Arial,sans-serif;color:#0f172a"><h2>Verify your email</h2><p>Your JobKhojo code is:</p><p style="font-size:28px;font-weight:bold;letter-spacing:6px;color:#2563eb">${code}</p><p>This code expires in 10 minutes. If you didn't request it, ignore this email.</p></div>`,
       text: `Your JobKhojo verification code is ${code}. It expires in 10 minutes.`,
@@ -132,7 +116,7 @@ export async function sendDailyJobDigest(){
   for (const subscriber of subscribers) {
     const unsubscribeUrl = `${process.env.API_PUBLIC_URL || "https://jobkhojoai-backend.onrender.com/api"}/alerts/unsubscribe/${subscriber.unsubscribeToken}`;
     const content = emailTemplate(jobs, unsubscribeUrl);
-    try { await sendMail({ to: subscriber.email, subject: `${jobs.length} new jobs on JobKhojo`, ...content }); }
+    try { await sendEmail({ to: subscriber.email, subject: `${jobs.length} new jobs on JobKhojo`, ...content }); }
     catch (error) { console.error(`Job digest failed for ${subscriber.email}:`, error.message); }
   }
 }

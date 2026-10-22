@@ -25,11 +25,15 @@ Fill in `.env`:
 - `JWT_SECRET` — any long random string
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` — your own admin login (this is the only account, used for the admin panel)
 
+For local MongoDB Atlas access, add the development machine's public IP under **Network Access** in Atlas. The backend intentionally waits for MongoDB before opening port 5000; if startup reports a server-selection/IP allowlist error, correct the Atlas network rule and restart it. Do not put database credentials in source code or expose the cluster to all IPs.
+
 Run it:
 ```
 npm run dev
 ```
 Server runs on http://localhost:5000
+
+Check backend and database readiness with `GET http://localhost:5000/api/health`; it returns `200` only after a MongoDB ping succeeds.
 
 ## 2. Frontend setup
 
@@ -65,7 +69,7 @@ the free backend is asleep.
 
 1. Go to `yoursite.com/admin/login`, log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` from your `.env`
 2. Click **+ Add Job**, fill the form, click **Publish Job**
-3. The job link works immediately. It joins the jobs list and gets a pre-rendered page at the next deploy
+3. The job link works immediately. It joins the jobs list and gets a pre-rendered page at the next build
    (automatic every morning — see below).
 
 ## 4. Deploying
@@ -88,6 +92,10 @@ verified sender domain. Set `RESEND_API_KEY`, `MAIL_FROM`, `PUBLIC_SITE_URL` and
 environment. The backend sends a six-digit email code and emails newly posted active jobs daily at
 `DIGEST_HOUR` in `DIGEST_TIME_ZONE` (defaults to 09:00 Asia/Kolkata).
 
+Creator support tickets use the same Resend setup and send a notification to `SUPPORT_EMAIL` (defaults to
+`hello@jobkhojoai.com`) after the ticket is saved. If delivery fails, the ticket remains available in the
+creator's support history and its email can be retried from the ticket details.
+
 To enable Google sign-in, set the same Google Identity Services web client ID as `GOOGLE_CLIENT_ID` in the
 backend and `VITE_GOOGLE_CLIENT_ID` in the frontend build environment. Without these provider settings, the
 apply prompt still works, but the matching sign-in/email delivery option is unavailable.
@@ -102,5 +110,8 @@ uses the same `RESEND_API_KEY` and `MAIL_FROM` settings as daily job alerts; if 
 jobs still expire but reminders are skipped and a server warning is logged.
 
 ## Notes
+
+
+- Creator Studio payouts are demo-only for now. Defer real payout methods, payment details, and transfers until buyer-side payments are integrated. When that work begins, base creator payouts on verified buyer transactions and secure backend records; browser-local demo requests are not payable balances.
 
 - No password-reset flow for admin — if you forget it, update `ADMIN_PASSWORD` in `.env` directly and redeploy

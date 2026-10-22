@@ -46,6 +46,7 @@ export default function SiteMap(){
           { to: "/jobs?type=internship", label: "Internships" },
           { to: "/saved-jobs", label: "Saved jobs" },
           { to: "/career-guide/resume-builder", label: "Free resume builder" },
+          { to: "/resume-marketplace", label: "Resume marketplace" },
         ]} />
         <Group title="Company hiring guides" links={COMPANY_GUIDES.map(c => ({ to: `/companies/${c.slug}`, label: `${c.name} hiring guide` }))} />
         <Group title="Career guides" links={guides} />

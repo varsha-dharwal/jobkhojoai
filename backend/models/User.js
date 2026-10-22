@@ -4,7 +4,8 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true, required: true },
     email: { type: String, trim: true, lowercase: true, required: true, unique: true },
-    passwordHash: { type: String, required: true },
+    passwordHash: { type: String, required: function requirePassword() { return !this.googleId; } },
+    googleId: { type: String, unique: true, sparse: true },
     resumeDraft: { type: Object, default: null },
   },
   { timestamps: true }

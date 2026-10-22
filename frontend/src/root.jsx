@@ -1,4 +1,4 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useRouteError } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse, useLocation, useRouteError } from "react-router";
 import SiteHeader from "./components/SiteHeader";
 import AnnouncementBar from "./components/AnnouncementBar";
 import SiteFooter from "./components/SiteFooter";
@@ -36,6 +36,14 @@ export function Layout({ children }){
 }
 
 export default function App(){
+  const { pathname } = useLocation();
+  const isCreatorStudio = pathname.startsWith("/creator/");
+  const isAdmin = pathname.startsWith("/admin/");
+
+  if (isCreatorStudio || isAdmin) {
+    return <div className="creator-app-shell"><Outlet /></div>;
+  }
+
   return (
     <>
       <AnnouncementBar />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 import SEO from "../components/SEO";
 import api from "../api/client";
 import { ResumeProvider, useResume, STEPS, EMPTY_RESUME } from "../context/ResumeContext";
@@ -203,6 +204,10 @@ function BuilderInner() {
 }
 
 export default function ResumeBuilder() {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const startFromScratch = searchParams.get("start") === "scratch";
+
   return (
     <main className="container guide-page">
       <SEO
@@ -210,7 +215,7 @@ export default function ResumeBuilder() {
         description="Build your first ATS-friendly resume for free. Step-by-step guidance for freshers and students, a resume readiness check, and a free PDF download — no login required."
         path="/career-guide/resume-builder"
       />
-      <ResumeProvider>
+      <ResumeProvider initialStage={startFromScratch ? "wizard" : "intro"}>
         <BuilderInner />
       </ResumeProvider>
       <ResumeGuide />

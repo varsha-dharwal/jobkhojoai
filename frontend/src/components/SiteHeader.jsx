@@ -53,7 +53,7 @@ export default function SiteHeader(){
             <span className="header-saved-label">Saved</span>
             {savedCount > 0 && <span className="count-badge">{savedCount}</span>}
           </Link>
-          <Link to="/career-guide/resume-builder" className="btn btn-primary btn-sm header-cta">Build your resume</Link>
+          <Link to="/resume-marketplace" className="btn btn-primary btn-sm header-cta">Resume Marketplace</Link>
           <button
             type="button"
             className="icon-button nav-toggle"
@@ -75,6 +75,7 @@ export default function SiteHeader(){
                 {item.label}
               </Link>
             ))}
+            <Link to="/resume-marketplace" className="mobile-nav-link" aria-current={pathname.startsWith("/resume-marketplace") || pathname.startsWith("/creator/") || pathname.startsWith("/resume-templates") ? "page" : undefined}>Resume Marketplace</Link>
             <Link to="/career-guide/resume-builder" className="mobile-nav-link">Resume builder</Link>
             <Link to="/saved-jobs" className="mobile-nav-link">Saved jobs{savedCount > 0 ? ` (${savedCount})` : ""}</Link>
             <div className="mobile-nav-secondary">

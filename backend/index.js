@@ -1,7 +1,8 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import zlib from "zlib";
+import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import jobRoutes from "./routes/jobs.js";
@@ -11,9 +12,13 @@ import resumeAiRoutes from "./routes/resumeAi.js";
 import contactRoutes from "./routes/contact.js";
 import alertRoutes, { sendDailyJobDigest } from "./routes/alerts.js";
 import suggestionRoutes from "./routes/suggestions.js";
+import creatorSupportRoutes from "./routes/creatorSupport.js";
 import { runJobLifecycle } from "./services/jobLifecycle.js";
 
-dotenv.config();
+if (!process.env.JWT_SECRET) {
+  console.error("Backend startup failed: JWT_SECRET is not configured. Set it in backend/.env.");
+  process.exit(1);
+}
 
 const app = express();
 
@@ -65,6 +70,14 @@ app.set("trust proxy", 1);
 app.use(express.json());
 
 app.get("/", (req, res) => res.json({ status: "jobkhojoAI API running" }));
+app.get("/api/health", async (req, res) => {
+  try {
+    await mongoose.connection.db.admin().ping();
+    res.json({ status: "ok", database: "connected" });
+  } catch {
+    res.status(503).json({ status: "unavailable", database: "disconnected" });
+  }
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/ai", aiRoutes);
@@ -73,6 +86,7 @@ app.use("/api/resume-ai", resumeAiRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/suggestions", suggestionRoutes);
+app.use("/api/creator-support", creatorSupportRoutes);
 
 // 404 fallback for unknown API routes
 app.use("/api", (req, res) => res.status(404).json({ message: "Route not found" }));

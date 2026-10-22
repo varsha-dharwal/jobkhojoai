@@ -17,6 +17,11 @@ export default [
   // Company guides only exist once one is published (drafts are visible in dev).
   ...(SHOW_COMPANIES ? [route("companies", "pages/Companies.jsx"), route("companies/:slug", "pages/CompanyGuide.jsx")] : []),
   route("career-guide/interview-tips", "pages/InterviewTips.jsx"),
+  route("resume-marketplace", "pages/ResumeMarketplace.jsx"),
+  route("resume-templates", "pages/ResumeTemplatesRoute.jsx"),
+  route("creator/dashboard", "pages/CreatorDashboard.jsx"),
+  route("creator/templates", "pages/CreatorTemplatesRedirect.jsx"),
+  route("creator/templates/new", "pages/CreatorTemplateUpload.jsx"),
   route("career-guide/resume-builder", "pages/ResumeBuilder.jsx"),
   route("career-guide/:slug", "pages/EditorialArticle.jsx"),
 
@@ -35,6 +40,7 @@ export default [
   route("admin/jobs/new", "pages/admin/AdminJobForm.jsx", { id: "admin-job-new" }),
   route("admin/jobs/:id/edit", "pages/admin/AdminJobForm.jsx", { id: "admin-job-edit" }),
   route("admin/messages", "pages/admin/AdminMessages.jsx"),
+  route("admin/resume-templates", "pages/admin/AdminResumeTemplates.jsx"),
 
   route("*", "pages/NotFound.jsx"),
 ];

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BellRing, X } from "lucide-react";
 import { API_BASE } from "../lib/api";
-
-// Keep this in sync with the public web client ID accepted by the alerts API.
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "868093988992-qj56h39hgj75oo8euq56s2bduif4vpco.apps.googleusercontent.com";
+import { GOOGLE_CLIENT_ID } from "../lib/googleIdentity";
 
 export default function JobAlertModal({ onClose, onApply }){
   const [step, setStep] = useState("prompt");
