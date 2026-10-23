@@ -1,11 +1,10 @@
-import FresherClassicPreview from "./templates/FresherClassicPreview";
-import FresherMinimalPreview from "./templates/FresherMinimalPreview";
+import MarketplaceTemplatePreview from "./MarketplaceTemplatePreview";
 
 export default function LivePreview({ resume }) {
-  const Template = resume.templateId === "minimal" ? FresherMinimalPreview : FresherClassicPreview;
+  const templateId = resume.templateId || "classic";
   return (
     <div className="resume-live-preview">
-      <Template resume={resume} />
+      <MarketplaceTemplatePreview templateId={templateId} resume={resume} />
     </div>
   );
 }

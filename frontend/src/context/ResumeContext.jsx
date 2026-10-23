@@ -39,8 +39,11 @@ function loadDraft() {
 
 const ResumeContext = createContext(null);
 
-export function ResumeProvider({ children, initialStage = "intro" }) {
-  const [resume, setResume] = useState(() => loadDraft() || EMPTY_RESUME);
+export function ResumeProvider({ children, initialStage = "intro", initialTemplateId = "" }) {
+  const [resume, setResume] = useState(() => {
+    const savedDraft = loadDraft() || EMPTY_RESUME;
+    return initialTemplateId ? { ...savedDraft, templateId: initialTemplateId } : savedDraft;
+  });
   const [stage, setStage] = useState(initialStage); // intro -> template -> wizard -> review -> score -> done
   const [stepIndex, setStepIndex] = useState(0);
   const saveTimer = useRef(null);

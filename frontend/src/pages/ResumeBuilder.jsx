@@ -27,13 +27,18 @@ function isDraftEmpty(resume) {
 // @react-pdf/renderer is ~450KB gzipped — dynamically imported only when the
 // user actually downloads, so it never loads on the rest of the builder flow.
 async function downloadResumePdf(resume) {
-  const [{ pdf }, { default: FresherClassicPdf }, { default: FresherMinimalPdf }] = await Promise.all([
+  const [{ pdf }, { default: FresherClassicPdf }, { default: FresherMinimalPdf }, { default: FresherVariantPdf }] = await Promise.all([
     import("@react-pdf/renderer"),
     import("../components/resume-builder/templates/FresherClassicPdf"),
     import("../components/resume-builder/templates/FresherMinimalPdf"),
+    import("../components/resume-builder/templates/FresherVariantPdf"),
   ]);
-  const PdfDoc = resume.templateId === "minimal" ? FresherMinimalPdf : FresherClassicPdf;
-  const blob = await pdf(<PdfDoc resume={resume} />).toBlob();
+  const document = resume.templateId === "classic"
+    ? <FresherClassicPdf resume={resume} />
+    : resume.templateId === "minimal" || resume.templateId === "clean-minimal"
+      ? <FresherMinimalPdf resume={resume} />
+      : <FresherVariantPdf resume={resume} variant={resume.templateId} />;
+  const blob = await pdf(document).toBlob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -207,6 +212,9 @@ export default function ResumeBuilder() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const startFromScratch = searchParams.get("start") === "scratch";
+  const requestedTemplate = searchParams.get("template");
+  const supportedTemplates = ["classic", "minimal", "ats-simple", "modern-professional", "clean-minimal", "entry-level-tech"];
+  const initialTemplateId = supportedTemplates.includes(requestedTemplate) ? requestedTemplate : "";
 
   return (
     <main className="container guide-page">
@@ -215,7 +223,7 @@ export default function ResumeBuilder() {
         description="Build your first ATS-friendly resume for free. Step-by-step guidance for freshers and students, a resume readiness check, and a free PDF download — no login required."
         path="/career-guide/resume-builder"
       />
-      <ResumeProvider initialStage={startFromScratch ? "wizard" : "intro"}>
+      <ResumeProvider initialStage={initialTemplateId || startFromScratch ? "wizard" : "intro"} initialTemplateId={initialTemplateId}>
         <BuilderInner />
       </ResumeProvider>
       <ResumeGuide />
